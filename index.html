@@ -6,6 +6,8 @@
         <script src="./lib/pdf-js/pdf.mjs" type="module"></script>
         <script src="./lib/pdf-lib/pdf-lib.min.js"></script>
         <link rel="stylesheet" href="./lib/purecss/pure-min.css" />
+        <link rel="stylesheet" href="./lib/font-awesome/css/fontawesome.min.css" />
+        <link rel="stylesheet" href="./lib/font-awesome/css/solid.min.css" />
 
         <style>
             body {
@@ -85,6 +87,11 @@
             .help {
                 font-size: 0.8em;
                 color: #666;
+            }
+
+            #download-button {
+                margin-top: 1em;
+                margin-bottom: 1em;
             }
         </style>
     </head>
@@ -539,6 +546,7 @@
                 const maxCardsPerPage = foldLine === "vertical" ? Math.floor(usableHeight / cardWidthDoc) : Math.floor(usableWidth / cardWidthDoc);
 
                 clearOutput();
+                generateLog.textContent = `Generating...`;
 
                 const pdfDoc = await PDFLib.PDFDocument.create();
 
@@ -602,6 +610,19 @@
                 const pdfBytes = await pdfDoc.save();
                 const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
 
+                // add download link
+                const downloadLink = document.createElement('a');
+                downloadLink.id = 'download-button';
+                downloadLink.href = pdfUrl;
+                downloadLink.download = 'cards.pdf';
+                downloadLink.textContent = ' Download PDF';
+                downloadLink.classList = "pure-button pure-button-primary";
+                const downloadIcon = document.createElement('i');
+                downloadIcon.classList = "fas fa-download";
+                downloadLink.prepend(downloadIcon);
+                document.getElementById('output').appendChild(downloadLink);
+
+                // add iframe
                 const iframe = document.createElement('iframe');
                 const iframeWidth = 900;
                 const iframeHeight = Math.round(iframeWidth / pageAspectRatio);
@@ -610,14 +631,7 @@
                 iframe.height = `${iframeHeight}px`;
                 document.getElementById('output').appendChild(iframe);
                 
-                // add download link
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pdfUrl;
-                downloadLink.download = 'cards.pdf';
-                downloadLink.textContent = 'Download PDF';
-                document.getElementById('output').appendChild(downloadLink);
-
-                generateLog.textContent = `Generated ${pages} pages with ${cards} cards`;
+                generateLog.textContent = `Generated ${pages} pages with ${cards.length} cards`;
             }
 
             document.getElementById('file').addEventListener('change', async (event) => {
@@ -639,7 +653,12 @@
             });
 
             document.getElementById('generate').addEventListener('click', async () => {
-                await generatePdf();
+                document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
+
+                window.setTimeout(async () => {
+                    await generatePdf();
+                    document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";
+                }, 100);
             });
         </script>
 
@@ -757,7 +776,7 @@
                 </fieldset>
 
                 <div class="pure-controls">
-                    <button id="refresh" class="pure-button pure-button-primary">Refresh Grid</button>
+                    <button id="refresh" class="pure-button pure-button-primary"><i class="fa fa-refresh"></i> Refresh Grid</button>
                 </div>
             </form>
 
@@ -780,7 +799,7 @@
                 </div>
 
                 <div class="pure-controls">
-                    <button id="extractCards" class="pure-button pure-button-primary">Extract Cards</button>
+                    <button id="extractCards" class="pure-button pure-button-primary"><i class="fa fa-gear"></i> Extract Cards</button>
                 </div>
             </form>
 
@@ -835,7 +854,9 @@
                 </fieldset>
 
                 <div class="pure-controls">
-                    <button id="generate" class="pure-button pure-button-primary">Generate PDF</button>
+                    <a id="generate" class="pure-button pure-button-primary">
+                        <i class="fa fa-flag-checkered"></i> Generate PDF
+                    </a>
                 </div>
             </form>
 
@@ -849,7 +870,7 @@
 
         <footer>
             <p>
-                This tool is based on the <a href="https://mozilla.github.io/pdf.js/">PDF.js</a> and <a href="https://pdf-lib.js.org/">PDF-Lib</a> libraries and uses <a href="https://purecss.io/">pure.css</a> &middot; Created with ❤️ by <a href="https://foosel.net">Gina "foosel" Häußge</a>
+                Created with ❤️ by <a href="https://foosel.net">Gina "foosel" Häußge</a>
             </p>
         </footer>
     </body>
