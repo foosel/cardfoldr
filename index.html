@@ -645,14 +645,35 @@
             });
 
             document.getElementById('refresh').addEventListener('click', async () => {
+                if (!pdf) {
+                    alert("Please select a file for the cards first");
+                    return;
+                }
                 await refresh();
             });
 
             document.getElementById('extractCards').addEventListener('click', async () => {
+                if (!pdf) {
+                    alert("Please select a file for the cards first");
+                    return;
+                }
+
+                const backLoc = document.getElementById('backs').value;
+                if (backLoc === "file" && !backgroundPdf) {
+                    alert("Please select a background file to use for the card backs");
+                    return;
+                }
+
                 await extractCards();
             });
 
             document.getElementById('generate').addEventListener('click', async () => {
+                const cards = document.getElementsByClassName('card');
+                if (cards.length === 0) {
+                    alert("Please extract the cards first");
+                    return;
+                }
+
                 document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
 
                 window.setTimeout(async () => {
