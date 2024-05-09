@@ -1,0 +1,856 @@
+<html>
+    <head>
+        <title>CardFoldr</title>
+        <meta charset="utf-8" />
+
+        <script src="./lib/pdf-js/pdf.mjs" type="module"></script>
+        <script src="./lib/pdf-lib/pdf-lib.min.js"></script>
+        <link rel="stylesheet" href="./lib/purecss/pure-min.css" />
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+
+            main, footer {
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            footer {
+                margin-top: 2em;
+                padding-top: 1em;
+                border-top: 1px solid #ccc;
+                font-size: 0.8em;
+                color: #666;
+            }
+
+            #pages,
+            #background-page {
+                display: flex;
+                flex-wrap: nowrap;
+                max-width: 100%;
+                overflow-x: auto;
+            }
+
+            .page {
+                display: flex;
+                flex-direction: column;
+                margin: 1em;
+            }
+
+            .page .page-info {
+                font-size: 0.8em;
+                font-weight: bold;
+                color: white;
+                background-color: black;
+                padding: 0.5em;
+                text-align: center;
+            }
+
+            .page.excluded {
+                opacity: 0.5;
+            }
+
+            .page canvas {
+                border: 1px solid black;
+            }
+
+            #cards {
+                display: flex;
+                flex-wrap: nowrap;
+                max-width: 100%;
+                overflow-x: auto;
+            }
+
+            .card {
+                display: flex;
+                flex-direction: column;
+                margin: 0.5em;
+            }
+
+            .card .front {
+                border: 5px solid blue;
+            }
+
+            .card .back {
+                border: 5px solid red;
+            }
+
+            .output iframe {
+                width: 100%;
+                height: 100%;
+            }
+
+            .help {
+                font-size: 0.8em;
+                color: #666;
+            }
+        </style>
+    </head>
+
+    <body>
+        <script type="module">
+            const { pdfjsLib, PDFLib } = globalThis;
+            pdfjsLib.GlobalWorkerOptions.workerSrc = './lib/pdf-js/pdf.worker.mjs';
+
+            let pdf = null;
+            let backgroundPdf = null;
+
+            const clearPages = () => {
+                const pagesContainer = document.getElementById('pages');
+                while (pagesContainer.firstChild) {
+                    pagesContainer.removeChild(pagesContainer.firstChild);
+                }
+                const backgroundContainer = document.getElementById('background-page');
+                while (backgroundContainer.firstChild) {
+                    backgroundContainer.removeChild(backgroundContainer.firstChild);
+                }
+            }
+
+            const parsePageSelection = (pageSelection, pageCount) => {
+                if (!pageSelection) {
+                    return Array.from({ length: pageCount }, (_, i) => i + 1);
+                }
+
+                let pages = [];
+                for (const page of pageSelection.split(',')) {
+                    const p = page.trim();
+                    if (p.includes("-")) {
+                        const parts = p.split('-').map(x => x.trim());
+
+                        let first = parts[0] === "" ? 1 : parseInt(parts[0]);
+                        let last = parts[1] === "" ? pageCount : parseInt(parts[1]);
+                        if (first > last) {
+                            const tmp = first;
+                            first = last;
+                            last = tmp;
+                        }
+                        pages = pages.concat(Array.from({ length: last - first + 1 }, (_, i) => i + first));
+                    } else {
+                        pages.push(parseInt(p));
+                    }
+                }
+
+                return pages.filter(x => x >= 1 && x <= pageCount);
+            }
+
+            const refresh = async () => {
+                if (!pdf) {
+                    return;
+                }
+
+                const countX = parseInt(document.getElementById('countX').value);
+                const countY = parseInt(document.getElementById('countY').value);
+                const startX = parseFloat(document.getElementById('startX').value);
+                const startY = parseFloat(document.getElementById('startY').value);
+                const width = parseFloat(document.getElementById('width').value);
+                const height = parseFloat(document.getElementById('height').value);
+                const marginX = parseFloat(document.getElementById('marginX').value);
+                const marginY = parseFloat(document.getElementById('marginY').value);
+                const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+                const scale = parseFloat(document.getElementById('scale').value);
+
+                clearPages();
+
+                const pagesContainer = document.getElementById('pages');
+                const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+
+                const drawPage = async (page) => {
+                    const viewport = page.getViewport({ scale });
+                    const mmFactor = page.userUnit / 72 * 25.4 / scale;
+
+                    const canvas = document.createElement('canvas');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    const ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+
+                    // draw card grid
+                    ctx.beginPath();
+                    ctx.lineWidth = 0.4 / mmFactor;
+                    ctx.strokeStyle = 'red';
+                    ctx.setLineDash([5, 5]);
+                    ctx.rect(startX / mmFactor, startY / mmFactor, (width * countX + marginX * (countX - 1)) / mmFactor, (height * countY + marginY * (countY - 1)) / mmFactor);
+                    for (let x = 1; x < countX; x++) {
+                        for (let y = 1; y < countY; y++) {
+                            // verticals
+                            ctx.moveTo((startX + x * width + (x - 1) * marginX) / mmFactor, startY / mmFactor);
+                            ctx.lineTo((startX + x * width + (x - 1) * marginX) / mmFactor, (startY + countY * height + marginY * (countY - 1)) / mmFactor);
+
+                            if (marginX > 0) {
+                                ctx.moveTo((startX + x * width + x * marginX) / mmFactor, startY / mmFactor);
+                                ctx.lineTo((startX + x * width + x * marginX) / mmFactor, (startY + countY * height + marginY * (countY - 1)) / mmFactor);
+                            }
+
+                            // horizontals
+                            ctx.moveTo(startX / mmFactor, (startY + y * height + (y - 1) * marginY) / mmFactor);
+                            ctx.lineTo((startX + countX * width + marginX * (countX - 1)) / mmFactor, (startY + y * height + (y - 1) * marginY) / mmFactor);
+
+                            if (marginY > 0) {
+                                ctx.moveTo(startX / mmFactor, (startY + y * height + y * marginY) / mmFactor);
+                                ctx.lineTo((startX + countX * width + marginX * (countX - 1)) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
+                            }
+                        }
+                    }
+                    ctx.stroke();
+
+                    // draw cut margin
+                    if (cutMargin > 0) {
+                        ctx.beginPath();
+                        ctx.lineWidth = 0.4 / mmFactor;
+                        ctx.strokeStyle = 'blue';
+                        ctx.setLineDash([5, 5]);
+                        for (let x = 0; x < countX; x++) {
+                            for (let y = 0; y < countY; y++) {
+                                const rectX = startX + x * width + x * marginX + cutMargin;
+                                const rectY = startY + y * height + y * marginY + cutMargin;
+                                ctx.rect(rectX / mmFactor, rectY / mmFactor, (width - 2 * cutMargin) / mmFactor, (height - 2 * cutMargin) / mmFactor);
+                            }
+                        }
+                        ctx.stroke();
+                    }
+
+                    return canvas;
+                }
+
+                for (let p = 1; p <= pdf.numPages; p++) {
+                    const page = await pdf.getPage(p);
+                    const viewport = page.getViewport({ scale });
+                    const mmFactor = page.userUnit / 72 * 25.4 / scale;
+
+                    const canvas = await drawPage(page);
+
+                    const pageElement = document.createElement('div');
+                    pageElement.id = `page-${p}`;
+                    pageElement.classList = "page" + (pageSelection.includes(p) ? "" : " excluded");
+
+                    const pageInfo = document.createElement('caption');
+                    pageInfo.classList = "page-info";
+                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${Math.round(viewport.width * mmFactor, 2)} x ${Math.round(viewport.height * mmFactor, 2)} mm`;
+
+                    pageElement.appendChild(pageInfo);
+                    pageElement.appendChild(canvas);
+                    pagesContainer.appendChild(pageElement);
+                }
+
+                if (backgroundPdf) {
+                    const backgroundPage = await backgroundPdf.getPage(1);
+                    const viewport = backgroundPage.getViewport({ scale });
+                    const mmFactor = backgroundPage.userUnit / 72 * 25.4 / scale;
+
+                    const canvas = await drawPage(backgroundPage);
+
+                    const pageElement = document.createElement('div');
+                    pageElement.id = `page-background`;
+                    pageElement.classList = "page";
+
+                    const pageInfo = document.createElement('caption');
+                    pageInfo.classList = "page-info";
+                    pageInfo.textContent = `Background: ${Math.round(viewport.width * mmFactor, 2)} x ${Math.round(viewport.height * mmFactor, 2)} mm`;
+
+                    pageElement.appendChild(pageInfo);
+                    pageElement.appendChild(canvas);
+                    document.getElementById("background-page").appendChild(pageElement);
+                }
+            }
+
+            const clearCards = () => {
+                const cardsContainer = document.getElementById('cards');
+                while (cardsContainer.firstChild) {
+                    cardsContainer.removeChild(cardsContainer.firstChild);
+                }
+                document.getElementById('card-output').textContent = "";
+            }
+
+            const extractCards = async () => {
+                if (!pdf) return;
+                const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+
+                const countX = parseInt(document.getElementById('countX').value);
+                const countY = parseInt(document.getElementById('countY').value);
+                const startX = parseFloat(document.getElementById('startX').value);
+                const startY = parseFloat(document.getElementById('startY').value);
+                const width = parseFloat(document.getElementById('width').value);
+                const height = parseFloat(document.getElementById('height').value);
+                const marginX = parseFloat(document.getElementById('marginX').value);
+                const marginY = parseFloat(document.getElementById('marginY').value);
+
+                const backLoc = document.getElementById('backs').value;
+
+                const scale = 2;
+
+                clearCards();
+
+                const cardsContainer = document.getElementById('cards');
+
+                let count = 1;
+                for (let p = 0; p < (backLoc === "lastpage" ? pageSelection.length - 1 : pageSelection.length); p = p + ((backLoc === "duplex" || backLoc === "duplex2") ? 2 : 1)) {
+                    const page = await pdf.getPage(pageSelection[p]);
+                    const mmFactor = page.userUnit / 72 * 25.4 / scale;
+                    const viewport = page.getViewport({ scale: scale });
+
+                    for (let y = 0; y < countY; y++) {
+                        for (let x = 0; x < countX; x++) {
+                            const canvas = document.createElement('canvas');
+                            canvas.height = height / mmFactor;
+                            canvas.width = width / mmFactor;
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
+                            await page.render({ canvasContext: ctx, viewport }).promise;
+
+                            const cardImage = document.createElement('img');
+                            cardImage.src = canvas.toDataURL();
+                            cardImage.className = "front";
+
+                            const cardElement = document.createElement('div');
+                            cardElement.id = `card-${count}`;
+                            cardElement.classList = `card`;
+                            cardElement.appendChild(cardImage);
+                            cardsContainer.appendChild(cardElement);
+
+                            count++;
+                        }
+                    }
+                }
+                document.getElementById('card-output').textContent = `Extracted ${count - 1} cards`;
+
+                if (backLoc === "lastpage" || backLoc === "file") {
+                    let lastPage;
+                    if (backLoc === "lastpage") {
+                        lastPage = await pdf.getPage(pageSelection[pageSelection.length - 1]);
+                    } else {
+                        lastPage = await backgroundPdf.getPage(1);
+                    }
+                    const mmFactor = lastPage.userUnit / 72 * 25.4 / scale;
+                    const viewport = lastPage.getViewport({ scale: scale });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.height = height / mmFactor;
+                    canvas.width = width / mmFactor;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
+                    await lastPage.render({ canvasContext: ctx, viewport }).promise;
+
+                    for (let i = 1; i < count; i++) {
+                        const cardElement = document.getElementById(`card-${i}`);
+                        const cardImage = document.createElement('img');
+                        cardImage.src = canvas.toDataURL();
+                        cardImage.className = "back";
+                        cardElement.appendChild(cardImage);
+                    }
+                } else if (backLoc === "duplex" || backLoc === "duplex2") {
+                    let count = 1;
+
+                    for (let p = 0; p < pageSelection.length; p = p + 2) {
+                        const backPage = await pdf.getPage(pageSelection[p]);
+                        const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
+                        const viewport = backPage.getViewport({ scale: scale });
+
+                        if (backLoc === "duplex") {
+                            for (let y = 0; y < countY; y++) {
+                                for (let x = countX - 1; x >= 0; x--) {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.height = height / mmFactor;
+                                    canvas.width = width / mmFactor;
+
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
+                                    await backPage.render({ canvasContext: ctx, viewport }).promise;
+
+                                    const cardImage = document.createElement('img');
+                                    cardImage.src = canvas.toDataURL();
+                                    cardImage.className = "back";
+
+                                    const cardElement = document.getElementById(`card-${count}`);
+                                    cardElement.appendChild(cardImage);
+
+                                    count++;
+                                }
+                            }
+                        } else {
+                            for (let y = countY - 1; y >= 0; y--) {
+                                for (let x = 0; x < countX; x++) {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.className = "back";
+                                    canvas.height = height / mmFactor;
+                                    canvas.width = width / mmFactor;
+
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.rotate(Math.PI);
+                                    ctx.translate((startX + x * width + x * marginX) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
+                                    await backPage.render({ canvasContext: ctx, viewport }).promise;
+
+                                    const cardImage = document.createElement('img');
+                                    cardImage.src = canvas.toDataURL();
+                                    cardImage.className = "back";
+
+                                    const cardElement = document.getElementById(`card-${count}`);
+                                    cardElement.appendChild(cardImage);
+
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const clearOutput = () => {
+                const outputContainer = document.getElementById('output');
+                while (outputContainer.firstChild) {
+                    outputContainer.removeChild(outputContainer.firstChild);
+                }
+            }
+
+            const insertMark = (page, x, y, options) => {
+                const length = options.length || 2;
+                const margin = options.margin || 1;
+                const color = options.color || PDFLib.grayscale(0);
+                const background = options.background || PDFLib.grayscale(1);
+                const thickness = options.thickness || 0.4;
+                const dashArray = options.dashArray || null;
+                const parts = options.parts || "nesw";
+                const mmFactor = options.mmFactor || (72 / 25.4);
+
+                const lineOptions = {
+                    color: color,
+                    thickness: thickness,
+                }
+                if (dashArray) {
+                    lineOptions.dashArray = dashArray;
+                }
+
+                const backgroundOptions = {
+                    color: background,
+                    thickness: 3 * thickness,
+                }
+
+                for (const c of parts) {
+                    let start, end;
+                    switch (c) {
+                        case "n":
+                            start = { x: x, y: y + margin * mmFactor };
+                            end = { x: x, y: y + (margin + length) * mmFactor };
+                            break;
+                        case "e":
+                            start = { x: x + margin * mmFactor, y: y };
+                            end = { x: x + (margin + length) * mmFactor, y: y };
+                            break;
+                        case "s":
+                        start = { x: x, y: y - margin * mmFactor };
+                            end = { x: x, y: y - (margin + length) * mmFactor };
+                            break;
+                        case "w":
+                        start = { x: x - margin * mmFactor, y: y };
+                            end = { x: x - (margin + length) * mmFactor, y: y };
+                            break;
+                    }
+
+                    page.drawLine({ start, end, ...backgroundOptions });
+                    page.drawLine({ start, end, ...lineOptions });
+                }
+            }
+
+            const drawMarkup = (page, orientation, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cardPerPage) => {
+                if (!page) return;
+                
+                const mmFactor = 72 / 25.4;
+
+                const cardWidthDoc = cardWidth * mmFactor;
+                const cardHeightDoc = cardHeight * mmFactor;
+                const cardMarginDoc = cardMargin * mmFactor;
+                const foldingMarginDoc = foldingMargin * mmFactor;
+                const cutMarginDoc = cutMargin * mmFactor;
+                const printerMarginDoc = printerMargin * mmFactor;
+
+                if (orientation === "vertical") {
+                    // fold line
+                    page.drawLine({
+                        start: { x: pageWidth / 2, y: printerMarginDoc },
+                        end: { x: pageWidth / 2, y: pageHeight - printerMarginDoc },
+                        thickness: 0.4,
+                        color: PDFLib.grayscale(0.7),
+                        dashArray: [5, 5],
+                    })
+
+                    // cut ticks
+                    const markX1 = pageWidth / 2 - foldingMarginDoc - cardHeightDoc + cutMarginDoc;
+                    const markX2 = pageWidth / 2 - foldingMarginDoc - cutMarginDoc;
+                    const markX3 = pageWidth / 2 + foldingMarginDoc + cutMarginDoc;
+                    const markX4 = pageWidth / 2 + foldingMarginDoc + cardHeightDoc - cutMarginDoc;
+
+                    for (let i = 0; i < cardPerPage; i++) {
+                        const partsLeft = (i === 0 || cardMargin) ? "nw" : "w";
+                        const partsRight = (i === 0 || cardMargin) ? "ne" : "e";
+                        const markY = (pageHeight + totalHeight) / 2 - i * (cardWidthDoc + cardMarginDoc) - cutMarginDoc;
+
+                        insertMark(page, markX1, markY, { parts: partsLeft });
+                        insertMark(page, markX2, markY, { parts: partsRight });
+                        insertMark(page, markX3, markY, { parts: partsLeft });
+                        insertMark(page, markX4, markY, { parts: partsRight });
+                        if (cardMargin > 0 && i < cardPerPage - 1) {
+                            const markY2 = markY - cardWidthDoc + 2 * cutMarginDoc;
+                            insertMark(page, markX1, markY2, { parts: cardMargin ? "sw" : "w"});
+                            insertMark(page, markX2, markY2, { parts: cardMargin ? "se" : "e"});
+                            insertMark(page, markX3, markY2, { parts: cardMargin ? "sw" : "w"});
+                            insertMark(page, markX4, markY2, { parts: cardMargin ? "se" : "e"});
+                        }
+                    }
+
+                    const finalMarkY = (pageHeight + totalHeight) / 2 - cardPerPage * (cardWidthDoc + cardMarginDoc) + cardMarginDoc + cutMarginDoc;
+                    insertMark(page, markX1, finalMarkY, { parts: "sw"});
+                    insertMark(page, markX2, finalMarkY, { parts: "se"});
+                    insertMark(page, markX3, finalMarkY, { parts: "sw"});
+                    insertMark(page, markX4, finalMarkY, { parts: "se"});
+                }
+            }
+
+            const generatePdf = async () => {
+                const pageSize = document.getElementById('pageSize').value;
+                const cardWidth = parseFloat(document.getElementById('width').value);
+                const cardHeight = parseFloat(document.getElementById('height').value);
+                const cardMargin = parseFloat(document.getElementById('cardMargin').value);
+                const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+                const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
+                const printerMargin = parseFloat(document.getElementById('printerMargin').value);
+                const foldLine = document.getElementById('foldLine').value;
+
+                const generateLog = document.getElementById('generate-output');
+
+                const pageFormat = PDFLib.PageSizes[pageSize];
+                const pageAspectRatio = pageFormat[0] / pageFormat[1];
+
+                const mmFactor = 72 / 25.4;
+                const printerMarginDoc = printerMargin * mmFactor;
+
+                const [pageWidth, pageHeight] = pageFormat;
+                const [usableWidth, usableHeight] = [pageWidth - 2 * printerMarginDoc, pageHeight - 2 * printerMarginDoc];
+                const [cardWidthDoc, cardHeightDoc] = [cardWidth * mmFactor, cardHeight * mmFactor];
+                const cardMarginDoc = cardMargin * mmFactor;
+                const foldingMarginDoc = foldingMargin * mmFactor;
+                const cutMarginDoc = cutMargin * mmFactor;
+                const markMarginDoc = 2 * mmFactor;
+                const markLengthDoc = 4 * mmFactor;
+
+                const maxCardsPerPage = foldLine === "vertical" ? Math.floor(usableHeight / cardWidthDoc) : Math.floor(usableWidth / cardWidthDoc);
+
+                clearOutput();
+
+                const pdfDoc = await PDFLib.PDFDocument.create();
+
+                let totalHeight, totalWidth;
+                if (foldLine === "vertical") {
+                    totalHeight = maxCardsPerPage * cardWidthDoc + (maxCardsPerPage - 1) * cardMargin * mmFactor;
+                    totalWidth = 2 * cardHeightDoc + cardMargin * mmFactor;
+                } else {
+                    totalWidth = maxCardsPerPage * cardWidthDoc + (maxCardsPerPage - 1) * cardMargin * mmFactor;
+                    totalHeight = 2 * cardHeightDoc + cardMargin * mmFactor;
+                }
+
+                const cards = document.getElementsByClassName('card');
+                let count = 0;
+                let pages = 0;
+                let page = null;
+                for (const cardElement of cards) {
+                    const frontImageElement = cardElement.getElementsByClassName('front')[0];
+                    const backImageElement = cardElement.getElementsByClassName('back')[0];
+
+                    const frontImage = await pdfDoc.embedPng(frontImageElement.src);
+                    const backImage = await pdfDoc.embedPng(backImageElement.src);
+
+                    if (page == null || count % maxCardsPerPage === 0) {
+                        drawMarkup(page, foldLine, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, maxCardsPerPage);
+                        pages++;
+                        page = pdfDoc.addPage(pageFormat);
+                    }
+
+                    if (foldLine === "vertical") {
+                        const xFront = pageWidth / 2 - foldingMarginDoc;
+                        const yFront = (pageHeight + totalHeight) / 2 - cardWidthDoc - (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
+
+                        const xBack = pageWidth / 2 + foldingMarginDoc;
+                        const yBack = (pageHeight + totalHeight) / 2 - (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
+
+                        page.drawImage(frontImage, {
+                            x: xFront,
+                            y: yFront,
+                            width: cardWidthDoc,
+                            height: cardHeightDoc,
+                            rotate: PDFLib.degrees(90),
+                        });
+
+                        page.drawImage(backImage, {
+                            x: xBack,
+                            y: yBack,
+                            width: cardWidthDoc,
+                            height: cardHeightDoc,
+                            rotate: PDFLib.degrees(-90),
+                        });
+                    } else {
+                        // TODO: Implement me
+                    }
+
+                    count++;
+                    generateLog.textContent = `Generating... (${count}/${cards.length})`;
+                }
+                drawMarkup(page, foldLine, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, maxCardsPerPage);
+
+                const pdfBytes = await pdfDoc.save();
+                const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+
+                const iframe = document.createElement('iframe');
+                const iframeWidth = 900;
+                const iframeHeight = Math.round(iframeWidth / pageAspectRatio);
+                iframe.src = pdfUrl;
+                iframe.width = `${iframeWidth}px`;
+                iframe.height = `${iframeHeight}px`;
+                document.getElementById('output').appendChild(iframe);
+                
+                // add download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pdfUrl;
+                downloadLink.download = 'cards.pdf';
+                downloadLink.textContent = 'Download PDF';
+                document.getElementById('output').appendChild(downloadLink);
+
+                generateLog.textContent = `Generated ${pages} pages with ${cards} cards`;
+            }
+
+            document.getElementById('file').addEventListener('change', async (event) => {
+                pdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
+                await refresh();
+            });
+
+            document.getElementById('background').addEventListener('change', async (event) => {
+                backgroundPdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
+                await refresh();
+            });
+
+            document.getElementById('refresh').addEventListener('click', async () => {
+                await refresh();
+            });
+
+            document.getElementById('extractCards').addEventListener('click', async () => {
+                await extractCards();
+            });
+
+            document.getElementById('generate').addEventListener('click', async () => {
+                await generatePdf();
+            });
+        </script>
+
+        <main class="container">
+
+            <h1>CardFoldr</h1>
+
+            <p>
+                This tool helps you to convert a PDF of card grids, optionally with a separate PDF for the card backs, into a PDF with the cards arranged side by side
+                with their backs, with a foldline right down the middle of the page, for easy double sided alignment.
+            </p>
+            <p>
+                The tool is designed to work with cards that are 9 to a page, but can be adjusted to work with other configurations.
+            </p>
+
+            <h2>Step 1: Select PDF</h2>
+
+            <p>
+                Select a PDF file with the cards you want to convert. The cards should be in the correct order and orientation.
+                If you have a separate file with the card backs, you can select it as the background file.
+            </p>
+
+            <form id="form-step1" class="pure-form" onsubmit="return false">
+                <fieldset>
+                    <legend>Cards</legend>
+                    <input type="file" id="file" accept=".pdf" />
+                </fieldset>
+                <fieldset>
+                    <legend>Background (optional)</legend>
+                    <input type="file" id="background" accept=".pdf" />
+                </fieldset>
+            </form>
+
+            <h2>Step 2: Create Grid</h2>
+
+            <p>
+                Define the grid for the cards. The grid will be drawn on the cards in red to help you move it to the
+                correct point. You can also define a cut margin which will be shown in blue.
+            </p>
+
+            <form id="form-step2" class="pure-form pure-form-aligned" onsubmit="return false">
+                <fieldset>
+                    <legend>Grid size</legend>
+
+                    <div class="pure-control-group">
+                        <label for="countX">Count X:</label>
+                        <input type="number" id="countX" min="1" step="1" value="3" />
+                        <span class="help">Number of cards in horizontal direction</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="countY">Count Y:</label>
+                        <input type="number" id="countY" min="1" step="1" value="3" />
+                        <span class="help">Number of cards in vertical direction</span>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Card size & location</legend>
+
+                    <div class="pure-control-group">
+                        <label for="width">Card width:</label>
+                        <input type="number" id="width" step="0.1" value="63" /> mm
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="height">Card height:</label>
+                        <input type="number" id="height" step="0.1" value="88" /> mm
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="startX">Start X:</label>
+                        <input type="number" id="startX" step="0.1" value="10" /> mm
+                        <span class="help">Distance from the left edge of the page to the left edge of the first card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="startY">Start Y:</label>
+                        <input type="number" id="startY" step="0.1" value="10" /> mm
+                        <span class="help">Distance from the top edge of the page to the top edge of the first card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="marginX">Margin X:</label>
+                        <input type="number" id="marginX" step="0.1" value="0" /> mm
+                        <span class="help">Distance between individual cards in horizontal direction</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="marginY">Margin Y:</label>
+                        <input type="number" id="marginY" step="0.1" value="0" /> mm
+                        <span class="help">Distance between individual cards in vertical direction</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="cutMargin">Cut margin:</label>
+                        <input type="number" id="cutMargin" min="0" step="0.1" value="0" /> mm
+                        <span class="help">Distance from the edge of the card to the cut line</span>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Scale & pages</legend>
+
+                    <div class="pure-control-group">
+                        <label for="scale">Scale:</label>
+                        <input type="number" id="scale" step="0.5" value="1" />
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="pageSelection">Pages:</label>
+                        <input type="text" id="pageSelection" placeholder="all" />
+                        <span class="help">Comma separated list of pages or ranges of all included pages</span>
+                    </div>
+                </fieldset>
+
+                <div class="pure-controls">
+                    <button id="refresh" class="pure-button pure-button-primary">Refresh Grid</button>
+                </div>
+            </form>
+
+            <div id="pdf">
+                <div id="pages"><p><em>Once you've loaded a PDF file, it will be shown here</em></p></div>
+                <div id="background-page"></div>
+            </div>
+
+            <h2>Step 3: Extract Cards</h2>
+
+            <form id="form-step3" class="pure-form pure-form-aligned" onsubmit="return false">
+                <div class="pure-control-group">
+                    <label for="backs">Backs:</label>
+                    <select id="backs">
+                        <option value="lastpage">Last page</option>
+                        <option value="duplex">Duplex (right edge)</option>
+                        <option value="duplex2">Duplex (bottom edge)</option>
+                        <option value="file">Separate file</option>
+                    </select>
+                </div>
+
+                <div class="pure-controls">
+                    <button id="extractCards" class="pure-button pure-button-primary">Extract Cards</button>
+                </div>
+            </form>
+
+            <div id="cards">
+                <p><em>Once you've extraced the cards, they will be shown here, front marked blue, backs marked red</em></p>
+            </div>
+
+            <p id="card-output"></p>
+
+            <h2>Step 4: Generate PDF</h2>
+
+            <form id="form-step4" class="pure-form pure-form-aligned" onsubmit="return false">
+                <fieldset>
+                    <legend>PDF settings</legend>
+                    <div class="pure-control-group">
+                        <label for="pageSize">Page size:</label>
+                        <select id="pageSize">
+                            <option value="A4">A4</option>
+                            <option value="Letter">Letter</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Layout settings</legend>
+
+                    <div class="pure-control-group">
+                        <label for="printerMargin">Printer margin:</label>
+                        <input type="number" id="printerMargin" min="0" step="0.1" value="5" /> mm
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="cardMargin">Card margin:</label>
+                        <input type="number" id="cardMargin" min="0" step="0.1" value="2" /> mm
+                        <span class="help">Distance between individual cards</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="foldingMargin">Folding margin:</label>
+                        <input type="number" id="foldingMargin" min="0" step="0.1" value="2" /> mm
+                        <span class="help">Distance from the fold line to the edge of the card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="foldLine">Fold line:</label>
+                        <select id="foldLine">
+                            <option value="vertical">Vertical</option>
+                            <!--option value="horizontal">Horizontal</option-->
+                        </select>
+                        <span class="help">Direction of the fold line, currently only verical is implemented</span>
+                    </div>
+                </fieldset>
+
+                <div class="pure-controls">
+                    <button id="generate" class="pure-button pure-button-primary">Generate PDF</button>
+                </div>
+            </form>
+
+            <p id="generate-output"></p>
+
+            <div id="output">
+                <em>Once you've generated the PDF, it will be shown here</em>
+            </div>
+
+        </main>
+
+        <footer>
+            <p>
+                This tool is based on the <a href="https://mozilla.github.io/pdf.js/">PDF.js</a> and <a href="https://pdf-lib.js.org/">PDF-Lib</a> libraries and uses <a href="https://purecss.io/">pure.css</a> &middot; Created with ❤️ by <a href="https://foosel.net">Gina "foosel" Häußge</a>
+            </p>
+        </footer>
+    </body>
+</html>
