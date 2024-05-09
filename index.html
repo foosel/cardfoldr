@@ -491,8 +491,8 @@
                     const markX4 = pageWidth / 2 + foldingMarginDoc + cardHeightDoc - cutMarginDoc;
 
                     for (let i = 0; i < cardPerPage; i++) {
-                        const partsLeft = (i === 0 || cardMargin) ? "nw" : "w";
-                        const partsRight = (i === 0 || cardMargin) ? "ne" : "e";
+                        const partsLeft = (i === 0 || cardMargin && cutMargin) ? "nw" : "w";
+                        const partsRight = (i === 0 || cardMargin && cutMargin) ? "ne" : "e";
                         const markY = (pageHeight + totalHeight) / 2 - i * (cardWidthDoc + cardMarginDoc) - cutMarginDoc;
 
                         insertMark(page, markX1, markY, { parts: partsLeft });
@@ -501,10 +501,10 @@
                         insertMark(page, markX4, markY, { parts: partsRight });
                         if (cardMargin > 0 && i < cardPerPage - 1) {
                             const markY2 = markY - cardWidthDoc + 2 * cutMarginDoc;
-                            insertMark(page, markX1, markY2, { parts: cardMargin ? "sw" : "w"});
-                            insertMark(page, markX2, markY2, { parts: cardMargin ? "se" : "e"});
-                            insertMark(page, markX3, markY2, { parts: cardMargin ? "sw" : "w"});
-                            insertMark(page, markX4, markY2, { parts: cardMargin ? "se" : "e"});
+                            insertMark(page, markX1, markY2, { parts: cardMargin && cutMargin ? "sw" : "w"});
+                            insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "e"});
+                            insertMark(page, markX3, markY2, { parts: cardMargin && cutMargin ? "sw" : "w"});
+                            insertMark(page, markX4, markY2, { parts: cardMargin && cutMargin ? "se" : "e"});
                         }
                     }
 
