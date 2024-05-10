@@ -293,7 +293,7 @@ const extractCards = async () => {
     } else if (backLoc === "duplex" || backLoc === "duplex2") {
         let backCount = 1;
 
-        for (let p = 0; p < pageSelection.length; p = p + 2) {
+        for (let p = 1; p < pageSelection.length; p = p + 2) {
             const backPage = await pdf.getPage(pageSelection[p]);
             const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
             const viewport = backPage.getViewport({ scale: scale });
