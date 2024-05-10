@@ -84,6 +84,15 @@ footer {
     display: flex;
     flex-direction: column;
     margin: 0.5em;
+    max-width: 30%;
+}
+
+.card.landscape {
+    max-width: 50%;
+}
+
+.card.portrait {
+    max-width: 30%;
 }
 
 .card .front {

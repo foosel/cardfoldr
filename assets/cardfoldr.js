@@ -204,7 +204,8 @@ const extractCards = async () => {
 
     const backLoc = document.getElementById('backs').value;
 
-    const scale = 2;
+    const scale = 4;
+    const orientationClass = (width > height) ? "landscape" : "portrait";
 
     clearCards();
 
@@ -232,7 +233,7 @@ const extractCards = async () => {
 
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${count}`;
-                cardElement.classList = `card`;
+                cardElement.classList = `card ${orientationClass}`;
                 cardElement.appendChild(cardImage);
                 cardsContainer.appendChild(cardElement);
 
