@@ -187,6 +187,7 @@ const clearCards = () => {
         cardsContainer.removeChild(cardsContainer.firstChild);
     }
     document.getElementById('card-output').textContent = "";
+    document.getElementById('generate').disabled = true;
 }
 
 const extractCards = async () => {
@@ -241,7 +242,6 @@ const extractCards = async () => {
             }
         }
     }
-    document.getElementById('card-output').textContent = `Extracted ${count - 1} cards`;
 
     if (backLoc === "lastpage" || backLoc === "file") {
         let lastPage;
@@ -347,6 +347,8 @@ const extractCards = async () => {
             }
         }
     }
+
+    document.getElementById('card-output').textContent = `Extracted ${count - 1} cards`;
 }
 
 // --- PDF generation ---
@@ -428,7 +430,7 @@ const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth,
             start: { x: pageWidth / 2, y: printerMarginDoc },
             end: { x: pageWidth / 2, y: pageHeight - printerMarginDoc },
             thickness: 0.4,
-            color: PDFLib.grayscale(0.7),
+            color: PDFLib.grayscale(0.5),
             dashArray: [5, 5],
         })
 
@@ -467,7 +469,7 @@ const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth,
             start: { x: printerMarginDoc, y: pageHeight / 2 },
             end: { x: pageWidth - printerMarginDoc, y: pageHeight /2 },
             thickness: 0.4,
-            color: PDFLib.grayscale(0.7),
+            color: PDFLib.grayscale(0.3),
             dashArray: [5, 5],
         })
 
@@ -768,6 +770,8 @@ document.getElementById('refresh').addEventListener('click', async () => {
         alert("Please select a file for the cards first");
         return;
     }
+    clearCards();
+    clearOutput();
     await refresh();
 });
 
@@ -791,7 +795,15 @@ document.getElementById('extractCards').addEventListener('click', async () => {
         return;
     }
 
-    await extractCards();
+    clearOutput();
+
+    document.getElementById("extractCards").getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
+
+    window.setTimeout(async () => {
+        await extractCards();
+        document.getElementById('generate').disabled = false;
+        document.getElementById("extractCards").getElementsByClassName("fa")[0].classList = "fa fa-gear";
+    }, 100);
 });
 
 document.getElementById('generate').addEventListener('click', async () => {
