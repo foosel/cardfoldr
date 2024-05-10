@@ -607,7 +607,15 @@ const generatePdf = async () => {
     clearOutput();
     generateLog.textContent = `Generating...`;
 
+    const url = "https://foosel.github.io/cardfoldr";
+    const now = new Date();
     const pdfDoc = await PDFLib.PDFDocument.create();
+    pdfDoc.setTitle(`CardFoldr version of ${pdfname}`);
+    pdfDoc.setAuthor(url);
+    pdfDoc.setProducer(url);
+    pdfDoc.setCreator(`CardFoldr (${url})`);
+    pdfDoc.setCreationDate(now);
+    pdfDoc.setModificationDate(now);
 
     const cards = document.getElementsByClassName('card');
     let count = 0;
