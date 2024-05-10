@@ -250,7 +250,7 @@
 
                     const pageInfo = document.createElement('caption');
                     pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${roundValue(viewport.width * mmFactor, 2)} x ${roundValue(viewport.height * mmFactor, 2)} mm`;
+                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
 
                     pageElement.appendChild(pageInfo);
                     pageElement.appendChild(canvas);
@@ -261,8 +261,8 @@
                         const x = event.clientX - rect.left;
                         const y = event.clientY - rect.top;
 
-                        const xCoord = roundValue(x * mmFactor, 2);
-                        const yCoord = roundValue(y * mmFactor, 2);
+                        const xCoord = roundValue(x * mmFactor, 1);
+                        const yCoord = roundValue(y * mmFactor, 1);
 
                         document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm`;
                     });
@@ -284,7 +284,7 @@
 
                     const pageInfo = document.createElement('caption');
                     pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Background: ${roundValue(viewport.width * mmFactor, 2)} x ${roundValue(viewport.height * mmFactor, 2)} mm`;
+                    pageInfo.textContent = `Background: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
 
                     pageElement.appendChild(pageInfo);
                     pageElement.appendChild(canvas);
