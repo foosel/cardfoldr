@@ -56,6 +56,12 @@
 
             .page canvas {
                 border: 1px solid black;
+                cursor: crosshair;
+            }
+
+            #coordinates {
+                font-size: 0.8em;
+                color: #666;
             }
 
             #cards {
@@ -103,6 +109,12 @@
 
             let pdf = null;
             let backgroundPdf = null;
+
+            const roundValue = (value, digits) => {
+                digits = digits || 0;
+                const factor = Math.pow(10, digits);
+                return Math.round(value * factor) / factor;
+            }
 
             const clearPages = () => {
                 const pagesContainer = document.getElementById('pages');
@@ -162,6 +174,9 @@
 
                 const pagesContainer = document.getElementById('pages');
                 const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+
+                const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
+                document.getElementById('coordinates').textContent = coordinateHelp;
 
                 const drawPage = async (page) => {
                     const viewport = page.getViewport({ scale });
@@ -235,11 +250,25 @@
 
                     const pageInfo = document.createElement('caption');
                     pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${Math.round(viewport.width * mmFactor, 2)} x ${Math.round(viewport.height * mmFactor, 2)} mm`;
+                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${roundValue(viewport.width * mmFactor, 2)} x ${roundValue(viewport.height * mmFactor, 2)} mm`;
 
                     pageElement.appendChild(pageInfo);
                     pageElement.appendChild(canvas);
                     pagesContainer.appendChild(pageElement);
+
+                    canvas.addEventListener("mousemove", (event) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = event.clientX - rect.left;
+                        const y = event.clientY - rect.top;
+
+                        const xCoord = roundValue(x * mmFactor, 2);
+                        const yCoord = roundValue(y * mmFactor, 2);
+
+                        document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm`;
+                    });
+                    canvas.addEventListener("mouseleave", () => {
+                        document.getElementById('coordinates').textContent = coordinateHelp;
+                    });
                 }
 
                 if (backgroundPdf) {
@@ -255,7 +284,7 @@
 
                     const pageInfo = document.createElement('caption');
                     pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Background: ${Math.round(viewport.width * mmFactor, 2)} x ${Math.round(viewport.height * mmFactor, 2)} mm`;
+                    pageInfo.textContent = `Background: ${roundValue(viewport.width * mmFactor, 2)} x ${roundValue(viewport.height * mmFactor, 2)} mm`;
 
                     pageElement.appendChild(pageInfo);
                     pageElement.appendChild(canvas);
@@ -625,7 +654,7 @@
                 // add iframe
                 const iframe = document.createElement('iframe');
                 const iframeWidth = 900;
-                const iframeHeight = Math.round(iframeWidth / pageAspectRatio);
+                const iframeHeight = roundValue(iframeWidth / pageAspectRatio);
                 iframe.src = pdfUrl;
                 iframe.width = `${iframeWidth}px`;
                 iframe.height = `${iframeHeight}px`;
@@ -807,6 +836,7 @@
             </form>
 
             <div id="pdf">
+                <div id="coordinates"></div>
                 <div id="pages"><p><em>Once you've loaded a PDF file, it will be shown here</em></p></div>
                 <div id="background-page"></div>
             </div>
