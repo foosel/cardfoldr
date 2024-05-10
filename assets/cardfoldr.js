@@ -3,6 +3,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = './assets/pdf-js/pdf.worker.mjs';
 
 let pdf = null;
 let backgroundPdf = null;
+let pdfname = null;
 
 const roundValue = (value, digits) => {
     digits = digits || 0;
@@ -174,7 +175,7 @@ const refresh = async () => {
     renderPages(pdf, pagesContainer, "page", "Page ", pageSelection);
     if (backgroundPdf) {
         const backgroundPagesContainer = document.getElementById('pages-back');
-        renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Background page ");
+        renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ");
     }
 }
 
@@ -554,10 +555,11 @@ const generatePdf = async () => {
     const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
 
     // add download link
+    const downloadName = pdfname ? pdfname.replace(/\.pdf$/i, ".foldable.pdf") : "cards.foldable.pdf";
     const downloadLink = document.createElement('a');
     downloadLink.id = 'download-button';
     downloadLink.href = pdfUrl;
-    downloadLink.download = 'cards.pdf';
+    downloadLink.download = downloadName;
     downloadLink.textContent = ' Download PDF';
     downloadLink.classList = "pure-button pure-button-primary";
     const downloadIcon = document.createElement('i');
@@ -577,13 +579,42 @@ const generatePdf = async () => {
     generateLog.textContent = `Generated ${pages} pages with ${cards.length} cards`;
 }
 
-document.getElementById('file').addEventListener('change', async (event) => {
+const onPdfChange = async (event) => {
+    pdf = null;
+    clearCards();
+    clearOutput();
+
+    if (!event || !event.target || !event.target.files || !event.target.files[0]) {
+        return;
+    }
+    pdfname = event.target.files[0].name;
     pdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
     await refresh();
+}
+
+document.getElementById('file').addEventListener('change', async (event) => {
+    await onPdfChange(event);
 });
 
-document.getElementById('background').addEventListener('change', async (event) => {
+const onBackgroundPdfChange = async (event) => {
+    backgroundPdf = null;
+    clearCards();
+    clearOutput();
+
+    if (!event || !event.target || !event.target.files || !event.target.files[0]) {
+        return;
+    }
     backgroundPdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
+    await refresh();
+}
+
+document.getElementById('background').addEventListener('change', async (event) => {
+    await onBackgroundPdfChange(event);
+});
+
+document.getElementById('remove-background').addEventListener('click', async () => {
+    document.getElementById('background').value = null;
+    await onBackgroundPdfChange();
     await refresh();
 });
 
@@ -632,3 +663,15 @@ document.getElementById('generate').addEventListener('click', async () => {
         document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";
     }, 100);
 });
+
+window.onload = async () => {
+    const fileElement = document.getElementById('file');
+    if (fileElement && fileElement.value) {
+        await onPdfChange({ target: fileElement });
+    }
+
+    const backgroundElement = document.getElementById('background');
+    if (backgroundElement && backgroundElement.value) {
+        await onBackgroundPdfChange({ target: backgroundElement });
+    }
+};

@@ -25,6 +25,13 @@ footer {
     margin-bottom: 1em;
 }
 
+#remove-background {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 1em;
+}
+
 /* pdf rendering */
 
 #pages,
