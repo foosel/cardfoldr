@@ -28,7 +28,7 @@
             }
 
             #pages,
-            #background-page {
+            #pages-back {
                 display: flex;
                 flex-wrap: nowrap;
                 max-width: 100%;
@@ -121,7 +121,7 @@
                 while (pagesContainer.firstChild) {
                     pagesContainer.removeChild(pagesContainer.firstChild);
                 }
-                const backgroundContainer = document.getElementById('background-page');
+                const backgroundContainer = document.getElementById('pages-back');
                 while (backgroundContainer.firstChild) {
                     backgroundContainer.removeChild(backgroundContainer.firstChild);
                 }
@@ -153,6 +153,8 @@
 
                 return pages.filter(x => x >= 1 && x <= pageCount);
             }
+
+            // --- PDF rendering ---
 
             const refresh = async () => {
                 if (!pdf) {
@@ -237,60 +239,50 @@
                     return canvas;
                 }
 
-                for (let p = 1; p <= pdf.numPages; p++) {
-                    const page = await pdf.getPage(p);
-                    const viewport = page.getViewport({ scale });
-                    const mmFactor = page.userUnit / 72 * 25.4 / scale;
+                const renderPages = async (pdfDoc, container, id, prefix, included) => {
+                    for (let p = 1; p <= pdfDoc.numPages; p++) {
+                        const page = await pdfDoc.getPage(p);
+                        const viewport = page.getViewport({ scale });
+                        const mmFactor = page.userUnit / 72 * 25.4 / scale;
 
-                    const canvas = await drawPage(page);
+                        const canvas = await drawPage(page);
 
-                    const pageElement = document.createElement('div');
-                    pageElement.id = `page-${p}`;
-                    pageElement.classList = "page" + (pageSelection.includes(p) ? "" : " excluded");
+                        const pageElement = document.createElement('div');
+                        pageElement.id = `${id}-${p}`;
+                        pageElement.classList = "page" + (included == null || included.includes(p) ? "" : " excluded");
 
-                    const pageInfo = document.createElement('caption');
-                    pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Page ${p}/${pdf.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
+                        const pageInfo = document.createElement('caption');
+                        pageInfo.classList = "page-info";
+                        pageInfo.textContent = `${prefix}${p}/${pdfDoc.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
 
-                    pageElement.appendChild(pageInfo);
-                    pageElement.appendChild(canvas);
-                    pagesContainer.appendChild(pageElement);
+                        pageElement.appendChild(pageInfo);
+                        pageElement.appendChild(canvas);
+                        container.appendChild(pageElement);
 
-                    canvas.addEventListener("mousemove", (event) => {
-                        const rect = canvas.getBoundingClientRect();
-                        const x = event.clientX - rect.left;
-                        const y = event.clientY - rect.top;
+                        canvas.addEventListener("mousemove", (event) => {
+                            const rect = canvas.getBoundingClientRect();
+                            const x = event.clientX - rect.left;
+                            const y = event.clientY - rect.top;
 
-                        const xCoord = roundValue(x * mmFactor, 1);
-                        const yCoord = roundValue(y * mmFactor, 1);
+                            const xCoord = roundValue(x * mmFactor, 1);
+                            const yCoord = roundValue(y * mmFactor, 1);
 
-                        document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm`;
-                    });
-                    canvas.addEventListener("mouseleave", () => {
-                        document.getElementById('coordinates').textContent = coordinateHelp;
-                    });
+                            document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm`;
+                        });
+                        canvas.addEventListener("mouseleave", () => {
+                            document.getElementById('coordinates').textContent = coordinateHelp;
+                        });
+                    }
                 }
 
+                renderPages(pdf, pagesContainer, "page", "Page ", pageSelection);
                 if (backgroundPdf) {
-                    const backgroundPage = await backgroundPdf.getPage(1);
-                    const viewport = backgroundPage.getViewport({ scale });
-                    const mmFactor = backgroundPage.userUnit / 72 * 25.4 / scale;
-
-                    const canvas = await drawPage(backgroundPage);
-
-                    const pageElement = document.createElement('div');
-                    pageElement.id = `page-background`;
-                    pageElement.classList = "page";
-
-                    const pageInfo = document.createElement('caption');
-                    pageInfo.classList = "page-info";
-                    pageInfo.textContent = `Background: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
-
-                    pageElement.appendChild(pageInfo);
-                    pageElement.appendChild(canvas);
-                    document.getElementById("background-page").appendChild(pageElement);
+                    const backgroundPagesContainer = document.getElementById('pages-back');
+                    renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Background page ");
                 }
             }
+
+            // --- Card extraction ---
 
             const clearCards = () => {
                 const cardsContainer = document.getElementById('cards');
@@ -378,8 +370,32 @@
                         cardImage.className = "back";
                         cardElement.appendChild(cardImage);
                     }
+                } else if (backLoc === "fileall") {
+                    let backCount = 1;
+                    for (let p = 0; p < backgroundPdf.numPages; p++) {
+                        const backPage = await backgroundPdf.getPage(p + 1);
+                        const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
+                        const viewport = backPage.getViewport({ scale: scale });
+
+                        const canvas = document.createElement('canvas');
+                        canvas.height = height / mmFactor;
+                        canvas.width = width / mmFactor;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
+                        await backPage.render({ canvasContext: ctx, viewport }).promise;
+
+                        const cardImage = document.createElement('img');
+                        cardImage.src = canvas.toDataURL();
+                        cardImage.className = "back";
+
+                        const cardElement = document.getElementById(`card-${backCount}`);
+                        cardElement.appendChild(cardImage);
+
+                        backCount++;
+                    }
                 } else if (backLoc === "duplex" || backLoc === "duplex2") {
-                    let count = 1;
+                    let backCount = 1;
 
                     for (let p = 0; p < pageSelection.length; p = p + 2) {
                         const backPage = await pdf.getPage(pageSelection[p]);
@@ -401,10 +417,10 @@
                                     cardImage.src = canvas.toDataURL();
                                     cardImage.className = "back";
 
-                                    const cardElement = document.getElementById(`card-${count}`);
+                                    const cardElement = document.getElementById(`card-${backCount}`);
                                     cardElement.appendChild(cardImage);
 
-                                    count++;
+                                    backCount++;
                                 }
                             }
                         } else {
@@ -424,16 +440,18 @@
                                     cardImage.src = canvas.toDataURL();
                                     cardImage.className = "back";
 
-                                    const cardElement = document.getElementById(`card-${count}`);
+                                    const cardElement = document.getElementById(`card-${backCount}`);
                                     cardElement.appendChild(cardImage);
 
-                                    count++;
+                                    backCount++;
                                 }
                             }
                         }
                     }
                 }
             }
+
+            // --- PDF generation ---
 
             const clearOutput = () => {
                 const outputContainer = document.getElementById('output');
@@ -688,8 +706,16 @@
                 }
 
                 const backLoc = document.getElementById('backs').value;
-                if (backLoc === "file" && !backgroundPdf) {
+                if ((backLoc === "file" || backLoc === "fileall") && !backgroundPdf) {
                     alert("Please select a background file to use for the card backs");
+                    return;
+                }
+                if (backLoc === "fileall" && pdf.pages.length !== backgroundPdf.pages.length) {
+                    alert("The number of pages in the card file and the card background file must match");
+                    return;
+                }
+                if ((backLoc === "duplex" || backLoc === "duplex2") && pdf.numPages % 2 !== 0){
+                    alert("The number of pages in the card file must be even to use duplex mode for card backs");
                     return;
                 }
 
@@ -828,6 +854,12 @@
                         <input type="text" id="pageSelection" placeholder="all" />
                         <span class="help">Comma separated list of pages or ranges of all included pages</span>
                     </div>
+
+                    <div class="pure-control-group">
+                        <label for="pageSelection">Background pages (optional):</label>
+                        <input type="text" id="backgroundPageSelection" placeholder="all" />
+                        <span class="help">Comma separated list of pages or ranges of all included pages from the background file</span>
+                    </div>
                 </fieldset>
 
                 <div class="pure-controls">
@@ -838,7 +870,7 @@
             <div id="pdf">
                 <div id="coordinates"></div>
                 <div id="pages"><p><em>Once you've loaded a PDF file, it will be shown here</em></p></div>
-                <div id="background-page"></div>
+                <div id="pages-back"></div>
             </div>
 
             <h2>Step 3: Extract Cards</h2>
@@ -850,7 +882,8 @@
                         <option value="lastpage">Last page</option>
                         <option value="duplex">Duplex (right edge)</option>
                         <option value="duplex2">Duplex (bottom edge)</option>
-                        <option value="file">Separate file</option>
+                        <option value="file">Separate file (first page only)</option>
+                        <option value="fileall">Separate file (all pages, count must match)</option>
                     </select>
                 </div>
 
