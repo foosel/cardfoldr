@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+main, footer {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+footer {
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid #ccc;
+    font-size: 0.8em;
+    color: #666;
+}
+
+.help {
+    font-size: 0.8em;
+    color: #666;
+}
+
+#download-button {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+/* pdf rendering */
+
+#pages,
+#pages-back {
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    margin: 1em;
+}
+
+.page .page-info {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+    background-color: black;
+    padding: 0.5em;
+    text-align: center;
+}
+
+.page.excluded {
+    opacity: 0.5;
+}
+
+.page canvas {
+    border: 1px solid black;
+    cursor: crosshair;
+}
+
+#coordinates {
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* card rendering */
+
+#cards {
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    margin: 0.5em;
+}
+
+.card .front {
+    border: 5px solid blue;
+}
+
+.card .back {
+    border: 5px solid red;
+}
+
+/* pdf output */
+
+.output iframe {
+    width: 100%;
+    height: 100%;
+}
