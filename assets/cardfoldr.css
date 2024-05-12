@@ -80,11 +80,21 @@ footer {
     overflow-x: auto;
 }
 
+.inclusion-info {
+    font-size: 0.8em;
+    color: #666;
+    margin: 1em;
+}
+
 .card {
     display: flex;
     flex-direction: column;
     margin: 0.5em;
     max-width: 30%;
+}
+
+.card.excluded {
+    opacity: 0.5;
 }
 
 .card.landscape {

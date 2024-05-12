@@ -233,11 +233,23 @@ const extractCards = async () => {
                 const cardImage = document.createElement('img');
                 cardImage.src = canvas.toDataURL();
                 cardImage.className = "front";
+                cardImage.style = `aspect-ratio: ${width} / ${height}`;
+
+                const backImage = document.createElement('img');
+                backImage.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+                backImage.className = "back";
+                backImage.style = `aspect-ratio: ${width} / ${height}`;
 
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${count}`;
                 cardElement.classList = `card ${orientationClass}`;
+                cardElement.addEventListener("click", () => {
+                    cardElement.classList.toggle("excluded");
+                });
+
                 cardElement.appendChild(cardImage);
+                cardElement.appendChild(backImage);
+
                 cardsContainer.appendChild(cardElement);
 
                 count++;
@@ -264,11 +276,8 @@ const extractCards = async () => {
         await lastPage.render({ canvasContext: ctx, viewport }).promise;
 
         for (let i = 1; i < count; i++) {
-            const cardElement = document.getElementById(`card-${i}`);
-            const cardImage = document.createElement('img');
+            const cardImage = document.getElementById(`card-${i}`).getElementsByClassName('back')[0];
             cardImage.src = canvas.toDataURL();
-            cardImage.className = "back";
-            cardElement.appendChild(cardImage);
         }
     } else if (backLoc === "fileall") {
         let backCount = 1;
@@ -285,12 +294,8 @@ const extractCards = async () => {
             ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
             await backPage.render({ canvasContext: ctx, viewport }).promise;
 
-            const cardImage = document.createElement('img');
+            const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
             cardImage.src = canvas.toDataURL();
-            cardImage.className = "back";
-
-            const cardElement = document.getElementById(`card-${backCount}`);
-            cardElement.appendChild(cardImage);
 
             backCount++;
         }
@@ -313,13 +318,9 @@ const extractCards = async () => {
                         ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
-                        const cardImage = document.createElement('img');
+                        const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
                         cardImage.src = canvas.toDataURL();
-                        cardImage.className = "back";
-
-                        const cardElement = document.getElementById(`card-${backCount}`);
-                        cardElement.appendChild(cardImage);
-
+            
                         backCount++;
                     }
                 }
@@ -336,13 +337,9 @@ const extractCards = async () => {
                         ctx.translate((startX + x * width + x * marginX) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
-                        const cardImage = document.createElement('img');
+                        const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
                         cardImage.src = canvas.toDataURL();
-                        cardImage.className = "back";
-
-                        const cardElement = document.getElementById(`card-${backCount}`);
-                        cardElement.appendChild(cardImage);
-
+            
                         backCount++;
                     }
                 }
@@ -637,7 +634,7 @@ const generatePdf = async () => {
     pdfDoc.setCreationDate(now);
     pdfDoc.setModificationDate(now);
 
-    const cards = document.getElementsByClassName('card');
+    const cards = document.querySelectorAll('.card:not(.excluded)');
     let count = 0;
     let pages = 0;
     let page = null;
