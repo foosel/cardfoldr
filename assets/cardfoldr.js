@@ -71,6 +71,7 @@ const refresh = async () => {
 
     const pagesContainer = document.getElementById('pages');
     const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
     const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
     document.getElementById('coordinates').textContent = coordinateHelp;
@@ -175,7 +176,7 @@ const refresh = async () => {
     renderPages(pdf, pagesContainer, "page", "Page ", pageSelection);
     if (backgroundPdf) {
         const backgroundPagesContainer = document.getElementById('pages-back');
-        renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ");
+        renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection);
     }
 }
 
@@ -193,6 +194,7 @@ const clearCards = () => {
 const extractCards = async () => {
     if (!pdf) return;
     const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
     const countX = parseInt(document.getElementById('countX').value);
     const countY = parseInt(document.getElementById('countY').value);
@@ -270,8 +272,8 @@ const extractCards = async () => {
         }
     } else if (backLoc === "fileall") {
         let backCount = 1;
-        for (let p = 0; p < backgroundPdf.numPages; p++) {
-            const backPage = await backgroundPdf.getPage(p + 1);
+        for (let p = 0; p < backgroundPageSelection.length; p++) {
+            const backPage = await backgroundPdf.getPage(backgroundPageSelection[p]);
             const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
             const viewport = backPage.getViewport({ scale: scale });
 
@@ -804,9 +806,14 @@ document.getElementById('extractCards').addEventListener('click', async () => {
         alert("Please select a background file to use for the card backs");
         return;
     }
-    if (backLoc === "fileall" && pdf.pages.length !== backgroundPdf.pages.length) {
-        alert("The number of pages in the card file and the card background file must match");
-        return;
+    if (backLoc === "fileall") {
+        const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+        const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf.numPages);
+
+        if (pageSelection.length !== backgroundPageSelection.length) {
+            alert("The number of (selected) pages in the card file and the card background file must match");
+            return;
+        }
     }
     if ((backLoc === "duplex" || backLoc === "duplex2") && pdf.numPages % 2 !== 0){
         alert("The number of pages in the card file must be even to use duplex mode for card backs");
