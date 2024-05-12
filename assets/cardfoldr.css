@@ -105,6 +105,15 @@ footer {
     max-width: 30%;
 }
 
+.card .card-info {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+    background-color: black;
+    padding: 0.5em;
+    text-align: center;
+}
+
 .card .front {
     border: 5px solid blue;
 }

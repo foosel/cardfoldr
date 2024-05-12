@@ -191,6 +191,10 @@ const clearCards = () => {
     document.getElementById('generate').disabled = true;
 }
 
+const updateDeckInfo = (count, excluded) => {
+    document.getElementById('card-output').textContent = `Extracted ${count} cards, ${excluded} of which are excluded, making for a total of ${count - excluded} cards to be included.`;
+}
+
 const extractCards = async () => {
     if (!pdf) return;
     const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
@@ -240,13 +244,19 @@ const extractCards = async () => {
                 backImage.className = "back";
                 backImage.style = `aspect-ratio: ${width} / ${height}`;
 
+                const cardInfo = document.createElement('div');
+                cardInfo.classList = "card-info";
+                cardInfo.textContent = `Card ${count}/${pageSelection.length * countX * countY}`;
+
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${count}`;
                 cardElement.classList = `card ${orientationClass}`;
                 cardElement.addEventListener("click", () => {
                     cardElement.classList.toggle("excluded");
+                    updateDeckInfo(count - 1, document.querySelectorAll('.card.excluded').length);
                 });
 
+                cardElement.appendChild(cardInfo);
                 cardElement.appendChild(cardImage);
                 cardElement.appendChild(backImage);
 
@@ -347,7 +357,7 @@ const extractCards = async () => {
         }
     }
 
-    document.getElementById('card-output').textContent = `Extracted ${count - 1} cards`;
+    updateDeckInfo(count - 1, document.querySelectorAll('.card.excluded').length);
 }
 
 // --- PDF generation ---
