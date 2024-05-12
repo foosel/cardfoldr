@@ -365,10 +365,17 @@ const insertMark = (page, x, y, options) => {
     const margin = options.margin || 1;
     const color = options.color || PDFLib.grayscale(0);
     const background = options.background || PDFLib.grayscale(1);
+    const offset = options.offset || PDFLib.grayscale(0.7);
     const thickness = options.thickness || 0.4;
     const dashArray = options.dashArray || null;
     const parts = options.parts || "nesw";
+    const cutterOffset = options.cutterOffset || 0;
     const mmFactor = options.mmFactor || (72 / 25.4);
+
+    const offsetOptions = {
+        color: offset,
+        thickness: cutterOffset * 2
+    }
 
     const lineOptions = {
         color: color,
@@ -380,7 +387,7 @@ const insertMark = (page, x, y, options) => {
 
     const backgroundOptions = {
         color: background,
-        thickness: 3 * thickness,
+        thickness: cutterOffset ? ((cutterOffset + thickness) * 2) : (3 * thickness),
     }
 
     for (const c of parts) {
@@ -395,7 +402,7 @@ const insertMark = (page, x, y, options) => {
                 end = { x: x + (margin + length) * mmFactor, y: y };
                 break;
             case "s":
-            start = { x: x, y: y - margin * mmFactor };
+                start = { x: x, y: y - margin * mmFactor };
                 end = { x: x, y: y - (margin + length) * mmFactor };
                 break;
             case "w":
@@ -405,11 +412,14 @@ const insertMark = (page, x, y, options) => {
         }
 
         page.drawLine({ start, end, ...backgroundOptions });
+        if (cutterOffset) {
+            page.drawLine({ start, end, ...offsetOptions });
+        }
         page.drawLine({ start, end, ...lineOptions });
     }
 }
 
-const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cardPerPage) => {
+const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, cardPerPage) => {
     if (!page) return;
     
     const mmFactor = 72 / 25.4;
@@ -420,6 +430,7 @@ const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth,
     const foldingMarginDoc = foldingMargin * mmFactor;
     const cutMarginDoc = cutMargin * mmFactor;
     const printerMarginDoc = printerMargin * mmFactor;
+    const cutterOffsetDoc = cutterOffset * mmFactor;
 
     const unitWidthDoc = rotate ? cardHeightDoc : cardWidthDoc;
     const unitHeightDoc = rotate ? cardWidthDoc : cardHeightDoc;
@@ -435,6 +446,10 @@ const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth,
         })
 
         // cut ticks
+        const tickOptions = {
+            cutterOffset: cutterOffsetDoc
+        }
+
         const markX1 = pageWidth / 2 - foldingMarginDoc - unitWidthDoc + cutMarginDoc;
         const markX2 = pageWidth / 2 - foldingMarginDoc - cutMarginDoc;
         const markX3 = pageWidth / 2 + foldingMarginDoc + cutMarginDoc;
@@ -445,24 +460,24 @@ const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth,
             const partsRight = (i === 0 || cardMargin && cutMargin) ? "ne" : "e";
             const markY = (pageHeight + totalHeight) / 2 - i * (unitHeightDoc + cardMarginDoc) - cutMarginDoc;
 
-            insertMark(page, markX1, markY, { parts: partsLeft });
-            insertMark(page, markX2, markY, { parts: partsRight });
-            insertMark(page, markX3, markY, { parts: partsLeft });
-            insertMark(page, markX4, markY, { parts: partsRight });
+            insertMark(page, markX1, markY, { parts: partsLeft, ...tickOptions });
+            insertMark(page, markX2, markY, { parts: partsRight, ...tickOptions });
+            insertMark(page, markX3, markY, { parts: partsLeft, ...tickOptions });
+            insertMark(page, markX4, markY, { parts: partsRight, ...tickOptions });
             if (cardMargin > 0 && i < cardPerPage - 1) {
                 const markY2 = markY - unitHeightDoc + 2 * cutMarginDoc;
-                insertMark(page, markX1, markY2, { parts: cardMargin && cutMargin ? "sw" : "w"});
-                insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "e"});
-                insertMark(page, markX3, markY2, { parts: cardMargin && cutMargin ? "sw" : "w"});
-                insertMark(page, markX4, markY2, { parts: cardMargin && cutMargin ? "se" : "e"});
+                insertMark(page, markX1, markY2, { parts: cardMargin && cutMargin ? "sw" : "w", ...tickOptions});
+                insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "e", ...tickOptions});
+                insertMark(page, markX3, markY2, { parts: cardMargin && cutMargin ? "sw" : "w", ...tickOptions});
+                insertMark(page, markX4, markY2, { parts: cardMargin && cutMargin ? "se" : "e", ...tickOptions});
             }
         }
 
         const finalMarkY = (pageHeight + totalHeight) / 2 - cardPerPage * (unitHeightDoc + cardMarginDoc) + cardMarginDoc + cutMarginDoc;
-        insertMark(page, markX1, finalMarkY, { parts: "sw"});
-        insertMark(page, markX2, finalMarkY, { parts: "se"});
-        insertMark(page, markX3, finalMarkY, { parts: "sw"});
-        insertMark(page, markX4, finalMarkY, { parts: "se"});
+        insertMark(page, markX1, finalMarkY, { parts: "sw", ...tickOptions});
+        insertMark(page, markX2, finalMarkY, { parts: "se", ...tickOptions});
+        insertMark(page, markX3, finalMarkY, { parts: "sw", ...tickOptions});
+        insertMark(page, markX4, finalMarkY, { parts: "se", ...tickOptions});
     } else {
         // fold line
         page.drawLine({
@@ -513,6 +528,7 @@ const generatePdf = async () => {
     const cutMargin = parseFloat(document.getElementById('cutMargin').value);
     const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
     const printerMargin = parseFloat(document.getElementById('printerMargin').value);
+    const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
     const foldLine = document.getElementById('foldLine').value;
 
     const generateLog = document.getElementById('generate-output');
@@ -631,7 +647,7 @@ const generatePdf = async () => {
         const backImage = await pdfDoc.embedPng(backImageElement.src);
 
         if (page == null || count % maxCardsPerPage === 0) {
-            drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, maxCardsPerPage);
+            drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, maxCardsPerPage);
             pages++;
             page = pdfDoc.addPage(pageFormat);
         }
@@ -696,7 +712,7 @@ const generatePdf = async () => {
         count++;
         generateLog.textContent = `Generating... (${count}/${cards.length})`;
     }
-    drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, maxCardsPerPage);
+    drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, maxCardsPerPage);
 
     const pdfBytes = await pdfDoc.save();
     const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
@@ -725,6 +741,8 @@ const generatePdf = async () => {
     
     generateLog.textContent = `Generated ${pages} pages with ${cards.length} cards`;
 }
+
+// --- Event listeners ---
 
 const onPdfChange = async (event) => {
     pdf = null;
