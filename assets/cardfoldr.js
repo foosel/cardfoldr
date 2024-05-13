@@ -268,14 +268,14 @@ const extractCards = async () => {
     }
 
     if (backLoc === "lastpage" || backLoc === "file") {
-        let lastPage;
+        let backsPage;
         if (backLoc === "lastpage") {
-            lastPage = await pdf.getPage(pageSelection[pageSelection.length - 1]);
+            backsPage = await pdf.getPage(pageSelection[pageSelection.length - 1]);
         } else {
-            lastPage = await backgroundPdf.getPage(1);
+            backsPage = await backgroundPdf.getPage(backgroundPageSelection[0]);
         }
-        const mmFactor = lastPage.userUnit / 72 * 25.4 / scale;
-        const viewport = lastPage.getViewport({ scale: scale });
+        const mmFactor = backsPage.userUnit / 72 * 25.4 / scale;
+        const viewport = backsPage.getViewport({ scale: scale });
 
         const canvas = document.createElement('canvas');
         canvas.height = height / mmFactor;
@@ -283,7 +283,7 @@ const extractCards = async () => {
 
         const ctx = canvas.getContext('2d');
         ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
-        await lastPage.render({ canvasContext: ctx, viewport }).promise;
+        await backsPage.render({ canvasContext: ctx, viewport }).promise;
 
         for (let i = 1; i < count; i++) {
             const cardImage = document.getElementById(`card-${i}`).getElementsByClassName('back')[0];
