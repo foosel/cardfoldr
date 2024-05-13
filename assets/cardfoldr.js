@@ -374,7 +374,7 @@ const insertMark = (page, x, y, options) => {
     const margin = options.margin || 1;
     const color = options.color || PDFLib.grayscale(0);
     const background = options.background || PDFLib.grayscale(1);
-    const offset = options.offset || PDFLib.grayscale(0.7);
+    const offset = options.offset || PDFLib.grayscale(0.5);
     const thickness = options.thickness || 0.4;
     const dashArray = options.dashArray || null;
     const parts = options.parts || "nesw";
