@@ -32,7 +32,9 @@
                 and host it yourself if you prefer. The source code is available on <a href="https://github.com/foosel/cardfoldr">GitHub</a>.
             </p>
 
-            <h2>Step 1: Select PDF(s)</h2>
+            <!-- PDF selection -->
+
+            <h2>Step 1: Select source PDF(s)</h2>
 
             <p>
                 Select a PDF file with the cards you want to convert. The cards should be in the correct order and orientation.
@@ -54,6 +56,8 @@
                 <div class="pure-controls">
                 </div>
             </form>
+
+            <!-- Grid creation -->
 
             <h2>Step 2: Create Grid</h2>
 
@@ -155,6 +159,8 @@
                 <div id="pages-back"></div>
             </div>
 
+            <!-- Card extraction -->
+
             <h2>Step 3: Extract Cards</h2>
 
             <form id="form-step3" class="pure-form pure-form-aligned" onsubmit="return false">
@@ -170,6 +176,11 @@
                 </div>
 
                 <div class="pure-controls">
+                    <input type="checkbox" id="rotateBacks" /> <label for="rotateBacks">Rotate backs 180°</label>
+                    <span class="help">Use this if the backs are otherwise upside down</span>
+                </div>
+
+                <div class="pure-controls">
                     <button id="extractCards" class="pure-button pure-button-primary"><i class="fa fa-gear"></i> Extract Cards</button>
                 </div>
             </form>
@@ -181,6 +192,8 @@
             </div>
 
             <p id="card-output"></p>
+
+            <!-- PDF Generation -->
 
             <h2>Step 4: Generate PDF</h2>
 

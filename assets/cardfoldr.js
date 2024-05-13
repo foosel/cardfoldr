@@ -195,6 +195,25 @@ const updateDeckInfo = (count, excluded) => {
     document.getElementById('card-output').textContent = `Extracted ${count} cards, ${excluded} of which are excluded, making for a total of ${count - excluded} cards to be included.`;
 }
 
+const rotateImage180 = async (image) => {
+    const img = new Image();
+    img.src = image;
+    await img.decode();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.translate(img.width / 2, img.height / 2);
+    ctx.rotate(Math.PI);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+    const src = canvas.toDataURL();
+    console.log(src);
+    return src;
+}
+
 const extractCards = async () => {
     if (!pdf) return;
     const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
@@ -210,6 +229,8 @@ const extractCards = async () => {
     const marginY = parseFloat(document.getElementById('marginY').value);
 
     const backLoc = document.getElementById('backs').value;
+
+    const rotateBacks = document.getElementById('rotateBacks').checked;
 
     const scale = 4;
     const orientationClass = (width > height) ? "landscape" : "portrait";
@@ -283,11 +304,14 @@ const extractCards = async () => {
 
         const ctx = canvas.getContext('2d');
         ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
+
         await backsPage.render({ canvasContext: ctx, viewport }).promise;
+
+        const src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
 
         for (let i = 1; i < count; i++) {
             const cardImage = document.getElementById(`card-${i}`).getElementsByClassName('back')[0];
-            cardImage.src = canvas.toDataURL();
+            cardImage.src = src;
         }
     } else if (backLoc === "fileall") {
         let backCount = 1;
@@ -302,10 +326,11 @@ const extractCards = async () => {
 
             const ctx = canvas.getContext('2d');
             ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
+    
             await backPage.render({ canvasContext: ctx, viewport }).promise;
 
             const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-            cardImage.src = canvas.toDataURL();
+            cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
 
             backCount++;
         }
@@ -326,11 +351,12 @@ const extractCards = async () => {
 
                         const ctx = canvas.getContext('2d');
                         ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
+                
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-                        cardImage.src = canvas.toDataURL();
-            
+                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+                        
                         backCount++;
                     }
                 }
@@ -338,18 +364,18 @@ const extractCards = async () => {
                 for (let y = countY - 1; y >= 0; y--) {
                     for (let x = 0; x < countX; x++) {
                         const canvas = document.createElement('canvas');
-                        canvas.className = "back";
                         canvas.height = height / mmFactor;
                         canvas.width = width / mmFactor;
 
                         const ctx = canvas.getContext('2d');
                         ctx.rotate(Math.PI);
                         ctx.translate((startX + x * width + x * marginX) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
+
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-                        cardImage.src = canvas.toDataURL();
-            
+                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+                        
                         backCount++;
                     }
                 }
