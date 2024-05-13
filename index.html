@@ -167,7 +167,7 @@
                 <div class="pure-control-group">
                     <label for="backs">Backs:</label>
                     <select id="backs">
-                        <option value="lastpage">Last page</option>
+                        <option value="lastpage" selected>Last page</option>
                         <option value="duplex">Duplex (right edge)</option>
                         <option value="duplex2">Duplex (bottom edge)</option>
                         <option value="file">Separate file (first page only)</option>
@@ -203,7 +203,7 @@
                     <div class="pure-control-group">
                         <label for="pageSize">Page size:</label>
                         <select id="pageSize">
-                            <option value="A4">A4</option>
+                            <option value="A4" selected>A4</option>
                             <option value="Letter">Letter</option>
                         </select>
                     </div>
@@ -215,10 +215,19 @@
                     <div class="pure-control-group">
                         <label for="foldLine">Fold line:</label>
                         <select id="foldLine">
-                            <option value="vertical">Vertical</option>
+                            <option value="vertical" selected>Vertical</option>
                             <option value="horizontal">Horizontal</option>
                         </select>
                         <span class="help">Direction of the fold line</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="foldLineEdge">Card edge towards foldline:</label>
+                        <select id="foldLineEdge">
+                            <option value="top">Top</option>
+                            <option value="bottom" selected>Bottom</option>
+                        </select>
+                        <span class="help">Which edge of the cards to orient towards the foldline</span>
                     </div>
 
                     <div class="pure-control-group">

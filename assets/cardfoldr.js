@@ -564,6 +564,7 @@ const generatePdf = async () => {
     const printerMargin = parseFloat(document.getElementById('printerMargin').value);
     const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
     const foldLine = document.getElementById('foldLine').value;
+    const foldLineEdge = document.getElementById('foldLineEdge').value;
 
     const generateLog = document.getElementById('generate-output');
 
@@ -667,8 +668,8 @@ const generatePdf = async () => {
         const frontImageElement = cardElement.getElementsByClassName('front')[0];
         const backImageElement = cardElement.getElementsByClassName('back')[0];
 
-        const frontImage = await pdfDoc.embedPng(frontImageElement.src);
-        const backImage = await pdfDoc.embedPng(backImageElement.src);
+        const frontImage = await pdfDoc.embedPng(foldLineEdge === "top" ? await rotateImage180(frontImageElement.src) : frontImageElement.src);
+        const backImage = await pdfDoc.embedPng(foldLineEdge === "top" ? await rotateImage180(backImageElement.src) : backImageElement.src);
 
         if (page == null || count % maxCardsPerPage === 0) {
             drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, maxCardsPerPage);
