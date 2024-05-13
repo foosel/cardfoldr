@@ -210,7 +210,6 @@ const rotateImage180 = async (image) => {
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
 
     const src = canvas.toDataURL();
-    console.log(src);
     return src;
 }
 
@@ -588,7 +587,6 @@ const generatePdf = async () => {
             // card fits on half of the page in both orientations, lets figure out how many cards we can fit
             const cardsPerPageWidth = Math.floor(usableHeight / (cardWidthDoc + cardMarginDoc));
             const cardsPerPageHeight = Math.floor(usableHeight / (cardHeightDoc + cardMarginDoc));
-            console.log(cardsPerPageWidth, cardsPerPageHeight);
 
             if (cardsPerPageWidth < cardsPerPageHeight) {
                 maxCardsPerPage = cardsPerPageHeight;
@@ -611,20 +609,15 @@ const generatePdf = async () => {
             return;
         }
 
-        console.log(maxCardsPerPage, rotate);
-
         const unitWidth = rotate ? cardHeightDoc : cardWidthDoc;
         const unitHeight = rotate ? cardWidthDoc : cardHeightDoc;
         totalHeight = maxCardsPerPage * unitHeight + (maxCardsPerPage - 1) * cardMargin * mmFactor;
         totalWidth = 2 * unitWidth + cardMargin * mmFactor;
-
-        console.log(totalWidth, totalHeight);
     } else {
         if (cardWidth < usableHalf && cardHeight < usableHalf) {
             // card fits on half of the page in both orientations, lets figure out how many cards we can fit
             const cardsPerPageWidth = Math.floor(usableWidth / (cardWidthDoc + cardMarginDoc));
             const cardsPerPageHeight = Math.floor(usableWidth / (cardHeightDoc + cardMarginDoc));
-            console.log(cardsPerPageWidth, cardsPerPageHeight);
 
             if (cardsPerPageWidth > cardsPerPageHeight) {
                 maxCardsPerPage = cardsPerPageWidth;
@@ -647,14 +640,10 @@ const generatePdf = async () => {
             return;
         }
 
-        console.log(maxCardsPerPage, rotate);
-
         const unitWidth = rotate ? cardHeightDoc : cardWidthDoc;
         const unitHeight = rotate ? cardWidthDoc : cardHeightDoc;
         totalWidth = maxCardsPerPage * unitWidth + (maxCardsPerPage - 1) * cardMargin * mmFactor;
         totalHeight = 2 * unitHeight + cardMargin * mmFactor;
-
-        console.log(totalWidth, totalHeight);
     }
 
     clearOutput();
