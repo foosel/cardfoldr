@@ -49,7 +49,67 @@ const parsePageSelection = (pageSelection, pageCount) => {
     return pages.filter(x => x >= 1 && x <= pageCount);
 }
 
+const toPageSelection = (selected, pageCount) => {
+    let last = null, rangeStart = null;
+    const output = [];
+    for (const page of selected) {
+        if (last) {
+            if (last + 1 === page) {
+                // in sequence
+                if (!rangeStart) {
+                    rangeStart = last;
+                }
+
+            } else {
+                // end of sequence
+                if (rangeStart) {
+                    // active range
+                    if (rangeStart === 1) {
+                        // range starting at 1
+                        output.push("-" + last);
+                    } else {
+                        output.push(rangeStart + "-" + last);
+                    }
+                    rangeStart = null;
+                } else {
+                    output.push(last);
+                }
+            }
+        }
+
+        last = page;
+    }
+
+    if (rangeStart) {
+        if (rangeStart === 1 && last === pageCount) {
+            // full range
+            return "";
+        } else if (last === pageCount) {
+            // range ending at last page
+            output.push(rangeStart + "-");
+        } else {
+            output.push(rangeStart + "-" + last);
+        }
+    } else {
+        output.push(last);
+    }
+
+    return output.join(", ");
+}
+
 // --- PDF rendering ---
+
+const updatePageSelection = (which) => {
+    if (which === "pdf" && pdf) {
+        const pagesContainer = document.getElementById('pages');
+        const selectedPages = Array.from(pagesContainer.querySelectorAll('.page:not(.excluded)')).map(x => parseInt(x.id.split('-')[1]));
+        document.getElementById('pageSelection').value = toPageSelection(selectedPages, pdf.numPages);
+    } else if (which === "background" && backgroundPdf) {
+        const backgroundContainer = document.getElementById('pages-back');
+        const selectedBackgroundPages = Array.from(backgroundContainer.querySelectorAll('.page:not(.excluded)')).map(x => parseInt(x.id.split('-')[2]));
+        document.getElementById('backgroundPageSelection').value = toPageSelection(selectedBackgroundPages, backgroundPdf ? backgroundPdf.numPages : 0);
+    }
+}
 
 const refresh = async () => {
     if (!pdf) {
@@ -150,6 +210,10 @@ const refresh = async () => {
             const pageInfo = document.createElement('caption');
             pageInfo.classList = "page-info";
             pageInfo.textContent = `${prefix}${p}/${pdfDoc.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
+            pageInfo.addEventListener("click", () => {
+                pageInfo.parentElement.classList.toggle("excluded");
+                updatePageSelection(container.id === 'pages' ? "pdf" : "background");
+            });
 
             pageElement.appendChild(pageInfo);
             pageElement.appendChild(canvas);
