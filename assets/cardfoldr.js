@@ -275,7 +275,7 @@ const extractCards = async () => {
 
                 const cardInfo = document.createElement('div');
                 cardInfo.classList = "card-info";
-                cardInfo.textContent = `Card ${count}/${pageSelection.length * countX * countY}`;
+                cardInfo.textContent = `Card ${count}/${expectedTotal}`;
 
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${count}`;
