@@ -832,15 +832,19 @@ document.getElementById('extractCards').addEventListener('click', async () => {
     if (backLoc === "fileall") {
         const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
         const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf.numPages);
-
+    
         if (pageSelection.length !== backgroundPageSelection.length) {
             alert("The number of (selected) pages in the card file and the card background file must match");
             return;
         }
     }
-    if ((backLoc === "duplex" || backLoc === "duplex2") && pdf.numPages % 2 !== 0){
-        alert("The number of pages in the card file must be even to use duplex mode for card backs");
-        return;
+    if ((backLoc === "duplex" || backLoc === "duplex2")) {
+        const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+        
+        if (pageSelection.length % 2 !== 0) {
+            alert("The number of pages in the card file must be even to use duplex mode for card backs");
+            return;
+        }
     }
 
     clearOutput();
