@@ -859,6 +859,10 @@ const onPdfChange = async (event) => {
 
 document.getElementById('file').addEventListener('change', async (event) => {
     await onPdfChange(event);
+
+    if (document.getElementById("autoExtract").checked) {
+        document.getElementById('extractCards').click();
+    }
 });
 
 const onBackgroundPdfChange = async (event) => {
@@ -891,6 +895,10 @@ document.getElementById('refresh').addEventListener('click', async () => {
     clearCards();
     clearOutput();
     await refresh();
+
+    if (document.getElementById("autoExtract").checked) {
+        document.getElementById('extractCards').click();
+    }
 });
 
 document.getElementById('extractCards').addEventListener('click', async () => {
@@ -930,6 +938,10 @@ document.getElementById('extractCards').addEventListener('click', async () => {
         await extractCards();
         document.getElementById('generate').disabled = false;
         document.getElementById("extractCards").getElementsByClassName("fa")[0].classList = "fa fa-gear";
+
+        if (document.getElementById("autoGenerate").checked) {
+            document.getElementById('generate').click();
+        }
     }, 100);
 });
 
