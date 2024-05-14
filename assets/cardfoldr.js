@@ -238,6 +238,15 @@ const extractCards = async () => {
 
     const cardsContainer = document.getElementById('cards');
 
+    let expectedTotal;
+    if (backLoc === "lastpage") {
+        expectedTotal = countX * countY * (pageSelection.length - 1);
+    } else if (backLoc === "file" || backLoc === "fileall") {
+        expectedTotal = countX * countY * pageSelection.length;
+    } else if (backLoc === "duplex" || backLoc === "duplex2") {
+        expectedTotal = countX * countY * Math.ceil(pageSelection.length / 2);
+    }
+
     let count = 1;
     for (let p = 0; p < (backLoc === "lastpage" ? pageSelection.length - 1 : pageSelection.length); p = p + ((backLoc === "duplex" || backLoc === "duplex2") ? 2 : 1)) {
         const page = await pdf.getPage(pageSelection[p]);
