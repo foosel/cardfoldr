@@ -638,6 +638,7 @@ const generatePdf = async () => {
     const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
     const foldLine = document.getElementById('foldLine').value;
     const foldLineEdge = document.getElementById('foldLineEdge').value;
+    const downloadFilename = document.getElementById('downloadFilename').value;
 
     const generateLog = document.getElementById('generate-output');
 
@@ -816,7 +817,7 @@ const generatePdf = async () => {
     const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
 
     // add download link
-    const downloadName = pdfname ? pdfname.replace(/\.pdf$/i, ".foldable.pdf") : "cards.foldable.pdf";
+    const downloadName = downloadFilename ? downloadFilename : (pdfname ? pdfname.replace(/\.pdf$/i, ".foldable.pdf") : "cards.foldable.pdf");
     const downloadLink = document.createElement('a');
     downloadLink.id = 'download-button';
     downloadLink.href = pdfUrl;
@@ -852,6 +853,7 @@ const onPdfChange = async (event) => {
     }
     pdfname = event.target.files[0].name;
     pdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
+    document.getElementById("downloadFilename").value = pdfname.replace(/\.pdf$/i, ".foldable.pdf");
     await refresh();
 }
 

@@ -5,6 +5,7 @@
 ### ✨ Improvements
 
 - Pages from source and optional back PDF can now be selected/deselected by clicking on their title bars.
+- Added an input field for the generated PDF filename, sourced from the input PDF filename by default.
 
 ### 🐛 Bug fixes
 
