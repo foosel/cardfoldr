@@ -4,8 +4,9 @@
 
 ### ✨ Improvements
 
-- Pages from source and optional back PDF can now be selected/deselected by clicking on their title bars.
-- Added an input field for the generated PDF filename, sourced from the input PDF filename by default.
+- Pages from source and optional back PDF can now be selected/deselected by clicking on their title bars. Implements #5.
+- Added an input field for the generated PDF filename, sourced from the input PDF filename by default. Implements #3.
+- Step 3 and 4 can now be automatically triggered once their requirements are met. This is enabled by checking the corresponding checkbox next to the buttons. Should help with batching multiple PDFs with the same grid. See also #8.
 
 ### 🐛 Bug fixes
 
