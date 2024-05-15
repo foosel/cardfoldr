@@ -207,16 +207,22 @@ const refresh = async () => {
             pageElement.id = `${id}-${p}`;
             pageElement.classList = "page" + (included == null || included.includes(p) ? "" : " excluded");
 
-            const pageInfo = document.createElement('caption');
-            pageInfo.classList = "page-info";
-            pageInfo.textContent = `${prefix}${p}/${pdfDoc.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
-            pageInfo.addEventListener("click", () => {
-                pageInfo.parentElement.classList.toggle("excluded");
+            const toggleExcluded = () => {
+                pageInfoTop.parentElement.classList.toggle("excluded");
                 updatePageSelection(container.id === 'pages' ? "pdf" : "background");
-            });
+            }
 
-            pageElement.appendChild(pageInfo);
+            const pageInfoTop = document.createElement('div');
+            pageInfoTop.classList = "page-info";
+            pageInfoTop.textContent = `${prefix}${p}/${pdfDoc.numPages}: ${roundValue(viewport.width * mmFactor, 1)} x ${roundValue(viewport.height * mmFactor, 1)} mm`;
+            pageInfoTop.addEventListener("click", toggleExcluded);
+
+            const pageInfoBottom = pageInfoTop.cloneNode(true);
+            pageInfoBottom.addEventListener("click", toggleExcluded);
+
+            pageElement.appendChild(pageInfoTop);
             pageElement.appendChild(canvas);
+            pageElement.appendChild(pageInfoBottom);
             container.appendChild(pageElement);
 
             canvas.addEventListener("mousemove", (event) => {
@@ -352,6 +358,7 @@ const extractCards = async () => {
                 cardElement.appendChild(cardInfo);
                 cardElement.appendChild(cardImage);
                 cardElement.appendChild(backImage);
+                cardElement.appendChild(cardInfo.cloneNode(true));
 
                 cardsContainer.appendChild(cardElement);
 
@@ -969,5 +976,15 @@ window.onload = async () => {
     const backgroundElement = document.getElementById('background');
     if (backgroundElement && backgroundElement.value) {
         await onBackgroundPdfChange({ target: backgroundElement });
+    }
+
+    for (const element of document.getElementsByClassName("scroll-horizontal")) {
+        element.addEventListener('wheel', (event) => {
+            const scrollAmount = parseInt(element.getAttribute('scroll-amount')) || 100;
+            if (event.deltaY !== 0) {
+                element.scrollLeft += event.deltaY > 0 ? 100 : -100;
+            }
+            event.preventDefault();
+        });
     }
 };
