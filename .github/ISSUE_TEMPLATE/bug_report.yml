@@ -7,3 +7,5 @@ body:
     attributes:
       label: Please describe the problem you are facing.
       description: A clear and concise description of what the problem is. If it concerns a specific board game, please provide a link to it as well. Screenshots and other media also go a long way in helping to understand what you're talking about.
+    validations:
+      required: true
