@@ -1,4 +1,4 @@
-const { pdfjsLib, PDFLib } = globalThis;
+const { pdfjsLib } = globalThis;
 pdfjsLib.GlobalWorkerOptions.workerSrc = './assets/pdf-js/pdf.worker.mjs';
 
 let pdf = null;
@@ -474,378 +474,129 @@ const clearOutput = () => {
     }
 }
 
-const insertMark = (page, x, y, options) => {
-    const length = options.length || 2;
-    const margin = options.margin || 1;
-    const color = options.color || PDFLib.grayscale(0);
-    const background = options.background || PDFLib.grayscale(1);
-    const offset = options.offset || PDFLib.grayscale(0.5);
-    const thickness = options.thickness || 0.4;
-    const dashArray = options.dashArray || null;
-    const parts = options.parts || "nesw";
-    const cutterOffset = options.cutterOffset || 0;
-    const mmFactor = options.mmFactor || (72 / 25.4);
+const humanFileSize = (bytes) => {
+    const units = ['B', 'KB', 'MB'];
 
-    const offsetOptions = {
-        color: offset,
-        thickness: cutterOffset * 2
+    let factor = 1;
+    let unit = units.shift();
+    while (bytes >= factor * 1024 && units.length > 0) {
+        unit = units.shift();
+        factor *= 1024;
     }
 
-    const lineOptions = {
-        color: color,
-        thickness: thickness,
-    }
-    if (dashArray) {
-        lineOptions.dashArray = dashArray;
-    }
-
-    const backgroundOptions = {
-        color: background,
-        thickness: cutterOffset ? ((cutterOffset + thickness) * 2) : (3 * thickness),
-    }
-
-    for (const c of parts) {
-        let start, end;
-        switch (c) {
-            case "n":
-                start = { x: x, y: y + margin * mmFactor };
-                end = { x: x, y: y + (margin + length) * mmFactor };
-                break;
-            case "e":
-                start = { x: x + margin * mmFactor, y: y };
-                end = { x: x + (margin + length) * mmFactor, y: y };
-                break;
-            case "s":
-                start = { x: x, y: y - margin * mmFactor };
-                end = { x: x, y: y - (margin + length) * mmFactor };
-                break;
-            case "w":
-            start = { x: x - margin * mmFactor, y: y };
-                end = { x: x - (margin + length) * mmFactor, y: y };
-                break;
-        }
-
-        page.drawLine({ start, end, ...backgroundOptions });
-        if (cutterOffset) {
-            page.drawLine({ start, end, ...offsetOptions });
-        }
-        page.drawLine({ start, end, ...lineOptions });
-    }
-}
-
-const drawMarkup = (page, orientation, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, cardPerPage) => {
-    if (!page) return;
-    
-    const mmFactor = 72 / 25.4;
-
-    const cardWidthDoc = cardWidth * mmFactor;
-    const cardHeightDoc = cardHeight * mmFactor;
-    const cardMarginDoc = cardMargin * mmFactor;
-    const foldingMarginDoc = foldingMargin * mmFactor;
-    const cutMarginDoc = cutMargin * mmFactor;
-    const printerMarginDoc = printerMargin * mmFactor;
-    const cutterOffsetDoc = cutterOffset * mmFactor;
-
-    const unitWidthDoc = rotate ? cardHeightDoc : cardWidthDoc;
-    const unitHeightDoc = rotate ? cardWidthDoc : cardHeightDoc;
-
-    if (orientation === "vertical") {
-        // fold line
-        page.drawLine({
-            start: { x: pageWidth / 2, y: printerMarginDoc },
-            end: { x: pageWidth / 2, y: pageHeight - printerMarginDoc },
-            thickness: 0.4,
-            color: PDFLib.grayscale(0.5),
-            dashArray: [5, 5],
-        })
-
-        // cut ticks
-        const tickOptions = {
-            cutterOffset: cutterOffsetDoc
-        }
-
-        const markX1 = pageWidth / 2 - foldingMarginDoc - unitWidthDoc + cutMarginDoc;
-        const markX2 = pageWidth / 2 - foldingMarginDoc - cutMarginDoc;
-        const markX3 = pageWidth / 2 + foldingMarginDoc + cutMarginDoc;
-        const markX4 = pageWidth / 2 + foldingMarginDoc + unitWidthDoc - cutMarginDoc;
-
-        for (let i = 0; i < cardPerPage; i++) {
-            const partsLeft = (i === 0 || cardMargin && cutMargin) ? "nw" : "w";
-            const partsRight = (i === 0 || cardMargin && cutMargin) ? "ne" : "e";
-            const markY = (pageHeight + totalHeight) / 2 - i * (unitHeightDoc + cardMarginDoc) - cutMarginDoc;
-
-            insertMark(page, markX1, markY, { parts: partsLeft, ...tickOptions });
-            insertMark(page, markX2, markY, { parts: partsRight, ...tickOptions });
-            insertMark(page, markX3, markY, { parts: partsLeft, ...tickOptions });
-            insertMark(page, markX4, markY, { parts: partsRight, ...tickOptions });
-            if (cardMargin > 0 && i < cardPerPage - 1) {
-                const markY2 = markY - unitHeightDoc + 2 * cutMarginDoc;
-                insertMark(page, markX1, markY2, { parts: cardMargin && cutMargin ? "sw" : "w", ...tickOptions});
-                insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "e", ...tickOptions});
-                insertMark(page, markX3, markY2, { parts: cardMargin && cutMargin ? "sw" : "w", ...tickOptions});
-                insertMark(page, markX4, markY2, { parts: cardMargin && cutMargin ? "se" : "e", ...tickOptions});
-            }
-        }
-
-        const finalMarkY = (pageHeight + totalHeight) / 2 - cardPerPage * (unitHeightDoc + cardMarginDoc) + cardMarginDoc + cutMarginDoc;
-        insertMark(page, markX1, finalMarkY, { parts: "sw", ...tickOptions});
-        insertMark(page, markX2, finalMarkY, { parts: "se", ...tickOptions});
-        insertMark(page, markX3, finalMarkY, { parts: "sw", ...tickOptions});
-        insertMark(page, markX4, finalMarkY, { parts: "se", ...tickOptions});
-    } else {
-        // fold line
-        page.drawLine({
-            start: { x: printerMarginDoc, y: pageHeight / 2 },
-            end: { x: pageWidth - printerMarginDoc, y: pageHeight /2 },
-            thickness: 0.4,
-            color: PDFLib.grayscale(0.3),
-            dashArray: [5, 5],
-        })
-
-        // cut ticks
-        const markY1 = pageHeight / 2 + foldingMarginDoc + unitHeightDoc - cutMarginDoc;
-        const markY2 = pageHeight / 2 + foldingMarginDoc + cutMarginDoc;
-        const markY3 = pageHeight / 2 - foldingMarginDoc - cutMarginDoc;
-        const markY4 = pageHeight / 2 - foldingMarginDoc - unitHeightDoc + cutMarginDoc;
-
-        for (let i = 0; i < cardPerPage; i++) {
-            const partsUp = (i === 0 || cardMargin && cutMargin) ? "nw" : "n";
-            const partsDown = (i === 0 || cardMargin && cutMargin) ? "sw" : "s";
-            const markX = (pageWidth - totalWidth) / 2 + i * (unitWidthDoc + cardMarginDoc) + cutMarginDoc;
-
-            insertMark(page, markX, markY1, { parts: partsUp });
-            insertMark(page, markX, markY2, { parts: partsDown });
-            insertMark(page, markX, markY3, { parts: partsUp });
-            insertMark(page, markX, markY4, { parts: partsDown });
-            if (cardMargin > 0 && i < cardPerPage - 1) {
-                const markX2 = markX + unitWidthDoc - 2 * cutMarginDoc;
-                insertMark(page, markX2, markY1, { parts: cardMargin && cutMargin ? "ne" : "n"});
-                insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "s"});
-                insertMark(page, markX2, markY3, { parts: cardMargin && cutMargin ? "ne" : "n"});
-                insertMark(page, markX2, markY4, { parts: cardMargin && cutMargin ? "se" : "s"});
-            }
-        }
-
-        const finalMarkX = (pageWidth - totalWidth) / 2 + cardPerPage * (unitWidthDoc + cardMarginDoc) - cardMarginDoc - cutMarginDoc;
-        insertMark(page, finalMarkX, markY1, { parts: "ne"});
-        insertMark(page, finalMarkX, markY2, { parts: "se"});
-        insertMark(page, finalMarkX, markY3, { parts: "ne"});
-        insertMark(page, finalMarkX, markY4, { parts: "se"});
-    }
+    return `${(bytes / factor).toFixed(2)} ${unit}`;
 }
 
 const generatePdf = async () => {
-    const pageSize = document.getElementById('pageSize').value;
-    const cardWidth = parseFloat(document.getElementById('width').value);
-    const cardHeight = parseFloat(document.getElementById('height').value);
-    const cardMargin = parseFloat(document.getElementById('cardMargin').value);
-    const cutMargin = parseFloat(document.getElementById('cutMargin').value);
-    const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
-    const printerMargin = parseFloat(document.getElementById('printerMargin').value);
-    const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
-    const foldLine = document.getElementById('foldLine').value;
-    const foldLineEdge = document.getElementById('foldLineEdge').value;
-    const downloadFilename = document.getElementById('downloadFilename').value;
+    const promise = new Promise(async (resolve, reject) => {
+        const pageSize = document.getElementById('pageSize').value;
+        const cardWidth = parseFloat(document.getElementById('width').value);
+        const cardHeight = parseFloat(document.getElementById('height').value);
+        const cardMargin = parseFloat(document.getElementById('cardMargin').value);
+        const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+        const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
+        const printerMargin = parseFloat(document.getElementById('printerMargin').value);
+        const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
+        const foldLine = document.getElementById('foldLine').value;
 
-    const generateLog = document.getElementById('generate-output');
+        const foldLineEdge = document.getElementById('foldLineEdge').value;
+        const downloadFilename = document.getElementById('downloadFilename').value;
 
-    const pageFormat = PDFLib.PageSizes[pageSize];
-    const pageAspectRatio = pageFormat[0] / pageFormat[1];
+        const cards = [];
+        for (const cardElement of document.querySelectorAll('.card:not(.excluded)')) {
+            const frontImageElement = cardElement.getElementsByClassName('front')[0];
+            const backImageElement = cardElement.getElementsByClassName('back')[0];
 
-    const mmFactor = 72 / 25.4;
-    const printerMarginDoc = printerMargin * mmFactor;
+            const frontImage = foldLineEdge === "top" ? await rotateImage180(frontImageElement.src) : frontImageElement.src;
+            const backImage = foldLineEdge === "top" ? await rotateImage180(backImageElement.src) : backImageElement.src;
 
-    const [pageWidth, pageHeight] = pageFormat;
-    const [usableWidth, usableHeight] = [pageWidth - 2 * printerMarginDoc, pageHeight - 2 * printerMarginDoc];
-    const [cardWidthDoc, cardHeightDoc] = [cardWidth * mmFactor, cardHeight * mmFactor];
-    const cardMarginDoc = cardMargin * mmFactor;
-    const foldingMarginDoc = foldingMargin * mmFactor;
-
-    const usableHalf = foldLine === "vertical" ? (usableWidth / 2 - 2 * foldingMarginDoc) : (usableHeight / 2 - 2 * foldingMarginDoc);
-    
-    let maxCardsPerPage, rotate, totalHeight, totalWidth;
-    if (foldLine === "vertical") {
-        if (cardWidth < usableHalf && cardHeight < usableHalf) {
-            // card fits on half of the page in both orientations, lets figure out how many cards we can fit
-            const cardsPerPageWidth = Math.floor(usableHeight / (cardWidthDoc + cardMarginDoc));
-            const cardsPerPageHeight = Math.floor(usableHeight / (cardHeightDoc + cardMarginDoc));
-
-            if (cardsPerPageWidth < cardsPerPageHeight) {
-                maxCardsPerPage = cardsPerPageHeight;
-                rotate = false;
-            } else {
-                maxCardsPerPage = cardsPerPageWidth;
-                rotate = true;
-            }
-        } else if (cardWidth < usableHalf) {
-            // card fits on half of the page in width, but not height
-            maxCardsPerPage = Math.floor(usableHeight / cardHeightDoc);
-            rotate = false;
-        } else if (cardHeight < usableHalf) {
-            // card fits on half of the page in height, but not width
-            maxCardsPerPage = Math.floor(usableWidth / cardWidthDoc);
-            rotate = true;
-        } else {
-            // card does not fit on half of the page in either orientation
-            alert("Cards are too large to fit on half of the page in either orientation");
-            return;
+            cards.push({ front: frontImage, back: backImage });
         }
 
-        const unitWidth = rotate ? cardHeightDoc : cardWidthDoc;
-        const unitHeight = rotate ? cardWidthDoc : cardHeightDoc;
-        totalHeight = maxCardsPerPage * unitHeight + (maxCardsPerPage - 1) * cardMargin * mmFactor;
-        totalWidth = 2 * unitWidth + cardMargin * mmFactor;
-    } else {
-        if (cardWidth < usableHalf && cardHeight < usableHalf) {
-            // card fits on half of the page in both orientations, lets figure out how many cards we can fit
-            const cardsPerPageWidth = Math.floor(usableWidth / (cardWidthDoc + cardMarginDoc));
-            const cardsPerPageHeight = Math.floor(usableWidth / (cardHeightDoc + cardMarginDoc));
+        const generateLog = document.getElementById('generate-output');
 
-            if (cardsPerPageWidth > cardsPerPageHeight) {
-                maxCardsPerPage = cardsPerPageWidth;
-                rotate = false;
-            } else {
-                maxCardsPerPage = cardsPerPageHeight;
-                rotate = true;
-            }
-        } else if (cardWidth < usableHalf) {
-            // card fits on half of the page in width, but not height
-            maxCardsPerPage = Math.floor(usableWidth / cardWidthDoc);
-            rotate = false;
-        } else if (cardHeight < usableHalf) {
-            // card fits on half of the page in height, but not width
-            maxCardsPerPage = Math.floor(usableWidth / cardHeightDoc);
-            rotate = true;
-        } else {
-            // card does not fit on half of the page in either orientation
-            alert("Cards are too large to fit on half of the page in either orientation");
-            return;
-        }
+        const worker = new Worker('./assets/worker.js');
+        worker.onmessage = async (e) => {
+            if (e.data.state) {
+                const { state, data } = e.data;
 
-        const unitWidth = rotate ? cardHeightDoc : cardWidthDoc;
-        const unitHeight = rotate ? cardWidthDoc : cardHeightDoc;
-        totalWidth = maxCardsPerPage * unitWidth + (maxCardsPerPage - 1) * cardMargin * mmFactor;
-        totalHeight = 2 * unitHeight + cardMargin * mmFactor;
-    }
+                switch (state) {
+                    case "progress": {
+                        const { done, all, progress } = data;
+                        generateLog.textContent = `Adding card ${done}/${all}... (${progress}%)`;
+                        break;
+                    }
+                    case "saving": {
+                        generateLog.textContent = "Compiling PDF...";
+                        break;
+                    }
+                    case "done": {
+                        const { cards, pages, bytes } = data;
+                        generateLog.textContent = `PDF compiled! Generated ${pages} pages for ${cards} cards, file size is ${humanFileSize(bytes)}.`;
+                        break;
+                    }
+                }
 
-    clearOutput();
-    generateLog.textContent = `Generating...`;
+            } else if (e.data.pdf) {
+                const { pdfBytes, aspectRatio } = e.data.pdf;
+                const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
 
-    const url = "https://foosel.github.io/cardfoldr";
-    const now = new Date();
-    const pdfDoc = await PDFLib.PDFDocument.create();
-    pdfDoc.setTitle(`CardFoldr version of ${pdfname}`);
-    pdfDoc.setAuthor(url);
-    pdfDoc.setProducer(url);
-    pdfDoc.setCreator(`CardFoldr (${url})`);
-    pdfDoc.setCreationDate(now);
-    pdfDoc.setModificationDate(now);
+                // add download link
+                const downloadName = downloadFilename ? downloadFilename : (pdfname ? pdfname.replace(/\.pdf$/i, ".foldable.pdf") : "cards.foldable.pdf");
+                const downloadLink = document.createElement('a');
+                downloadLink.id = 'download-button';
+                downloadLink.href = pdfUrl;
+                downloadLink.download = downloadName;
+                downloadLink.textContent = ' Download PDF';
+                downloadLink.classList = "pure-button pure-button-primary";
+                const downloadIcon = document.createElement('i');
+                downloadIcon.classList = "fas fa-download";
+                downloadLink.prepend(downloadIcon);
+                document.getElementById('output').appendChild(downloadLink);
 
-    const cards = document.querySelectorAll('.card:not(.excluded)');
-    let count = 0;
-    let pages = 0;
-    let page = null;
-    for (const cardElement of cards) {
-        const frontImageElement = cardElement.getElementsByClassName('front')[0];
-        const backImageElement = cardElement.getElementsByClassName('back')[0];
-
-        const frontImage = await pdfDoc.embedPng(foldLineEdge === "top" ? await rotateImage180(frontImageElement.src) : frontImageElement.src);
-        const backImage = await pdfDoc.embedPng(foldLineEdge === "top" ? await rotateImage180(backImageElement.src) : backImageElement.src);
-
-        if (page == null || count % maxCardsPerPage === 0) {
-            drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, maxCardsPerPage);
-            pages++;
-            page = pdfDoc.addPage(pageFormat);
-        }
-
-        let xFront, yFront, xBack, yBack, angleFront, angleBack;
-        if (foldLine === "vertical") {
-            if (rotate) {
-                angleFront = PDFLib.degrees(90);
-                xFront = pageWidth / 2 - foldingMarginDoc;
-                yFront = (pageHeight + totalHeight) / 2 - cardWidthDoc - (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
-    
-                angleBack = PDFLib.degrees(-90);
-                xBack = pageWidth / 2 + foldingMarginDoc;
-                yBack = (pageHeight + totalHeight) / 2 - (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
-
-            } else {
-                angleFront = PDFLib.degrees(0);
-                xFront = pageWidth / 2 - foldingMarginDoc - cardWidthDoc;
-                yFront = (pageHeight + totalHeight) / 2 - cardHeightDoc - (count % maxCardsPerPage) * (cardHeightDoc + cardMarginDoc);
-    
-                angleBack = PDFLib.degrees(0);
-                xBack = pageWidth / 2 + foldingMarginDoc;
-                yBack = yFront;
-            }
-        } else {
-            if (!rotate) {
-                angleFront = PDFLib.degrees(0);
-                yFront = pageHeight / 2 + foldingMarginDoc;
-                xFront = (pageWidth - totalWidth) / 2 + (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
-    
-                angleBack = PDFLib.degrees(180);
-                yBack = pageHeight / 2 - foldingMarginDoc;
-                xBack = xFront + cardWidthDoc;
-
-            } else {
-                angleFront = PDFLib.degrees(90);
-                yFront = pageHeight / 2 + foldingMarginDoc;
-                xFront = (pageWidth - totalWidth) / 2 + cardHeightDoc + (count % maxCardsPerPage) * (cardHeightDoc + cardMarginDoc);
-    
-                angleBack = PDFLib.degrees(90);
-                yBack = pageHeight / 2 - foldingMarginDoc - cardWidthDoc;
-                xBack = xFront
+                // add iframe
+                const iframe = document.createElement('iframe');
+                const iframeWidth = 900;
+                const iframeHeight = roundValue(iframeWidth / aspectRatio);
+                iframe.src = pdfUrl;
+                iframe.width = `${iframeWidth}px`;
+                iframe.height = `${iframeHeight}px`;
+                document.getElementById('output').appendChild(iframe);
+                
+                resolve();
             }
         }
+        worker.onerror = (e) => {
+            console.error(e.message, e.filename, e.lineno, e.colno, e.error);
+            generateLog.textContent = "Error generating PDF!";
+            reject(e);
+        }
 
-        page.drawImage(frontImage, {
-            x: xFront,
-            y: yFront,
-            width: cardWidthDoc,
-            height: cardHeightDoc,
-            rotate: angleFront,
+        generateLog.textContent = "Generating PDF...";
+
+        const title = `CardFoldr version of ${pdfname}`;
+        worker.postMessage({
+            generatePdf: {
+                cards: cards,
+                options: {
+                    cardWidth,
+                    cardHeight,
+
+                    cardMargin,
+                    cutMargin,
+                    foldingMargin,
+                    printerMargin,
+                    cutterOffset,
+
+                    pageSize,
+                    foldLine,
+                    title,
+                }
+            }
         });
+    });
 
-        page.drawImage(backImage, {
-            x: xBack,
-            y: yBack,
-            width: cardWidthDoc,
-            height: cardHeightDoc,
-            rotate: angleBack,
-        });
-
-        count++;
-        generateLog.textContent = `Generating... (${count}/${cards.length})`;
-    }
-    drawMarkup(page, foldLine, rotate, pageWidth, pageHeight, cardWidth, cardHeight, totalWidth, totalHeight, cardMargin, foldingMargin, cutMargin, printerMargin, cutterOffset, maxCardsPerPage);
-
-    const pdfBytes = await pdfDoc.save();
-    const pdfUrl = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
-
-    // add download link
-    const downloadName = downloadFilename ? downloadFilename : (pdfname ? pdfname.replace(/\.pdf$/i, ".foldable.pdf") : "cards.foldable.pdf");
-    const downloadLink = document.createElement('a');
-    downloadLink.id = 'download-button';
-    downloadLink.href = pdfUrl;
-    downloadLink.download = downloadName;
-    downloadLink.textContent = ' Download PDF';
-    downloadLink.classList = "pure-button pure-button-primary";
-    const downloadIcon = document.createElement('i');
-    downloadIcon.classList = "fas fa-download";
-    downloadLink.prepend(downloadIcon);
-    document.getElementById('output').appendChild(downloadLink);
-
-    // add iframe
-    const iframe = document.createElement('iframe');
-    const iframeWidth = 900;
-    const iframeHeight = roundValue(iframeWidth / pageAspectRatio);
-    iframe.src = pdfUrl;
-    iframe.width = `${iframeWidth}px`;
-    iframe.height = `${iframeHeight}px`;
-    document.getElementById('output').appendChild(iframe);
-    
-    generateLog.textContent = `Generated ${pages} pages with ${cards.length} cards`;
+    return promise;
 }
 
 // --- Event listeners ---
@@ -960,7 +711,6 @@ document.getElementById('generate').addEventListener('click', async () => {
     }
 
     document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
-
     window.setTimeout(async () => {
         await generatePdf();
         document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";

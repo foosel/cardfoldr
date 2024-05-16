@@ -1,5 +1,14 @@
 # Changelog
 
+## 2024-05-15
+
+### ✨ Improvements
+
+- Scrolling the pages and card area by mousewheel now happens horizontally. This should make navigating these easier.
+- Page and card title bars are now at the top and the bottom of the item. This makes it easier to toggle page selection and also makes information more readily available while scrolling through large amounts of pages or cards.
+- Improved the performance of PDF generation by moving it to a background worker. This should make the UI more responsive while generating the PDF and also give better feedback while the generation process is ongoing. Implements #11.
+- Added some basic deduplication while embedding the card images into the PDF. This helps to reduce the file size. One step towards solving #2.
+
 ## 2024-05-14
 
 ### ✨ Improvements

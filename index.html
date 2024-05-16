@@ -4,7 +4,6 @@
         <meta charset="utf-8" />
 
         <script src="./assets/pdf-js/pdf.mjs" type="module"></script>
-        <script src="./assets/pdf-lib/pdf-lib.min.js"></script>
         <script src="./assets/cardfoldr.js" type="module"></script>
         
         <link rel="stylesheet" href="./assets/purecss/pure-min.css" />
@@ -268,9 +267,15 @@
                         <i class="fa fa-flag-checkered"></i> Generate PDF
                     </button> <input type="checkbox" id="autoGenerate" /> <label for="autoGenerate">Auto generate</label>
                 </div>
+
+                <div class="pure-controls">
+                    <span id="generate-output"></span>
+                </div>
             </form>
 
-            <p id="generate-output"></p>
+            <!-- Result -->
+
+            <h2>Result: Generated PDF</h2>
 
             <div id="output">
                 <em>Once you've generated the PDF, it will be shown here</em>
