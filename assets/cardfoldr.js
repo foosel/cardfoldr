@@ -505,6 +505,9 @@ const generatePdf = async () => {
         const foldLineEdge = document.getElementById('foldLineEdge').value;
         const downloadFilename = document.getElementById('downloadFilename').value;
 
+        const generateLog = document.getElementById('generate-output');
+        generateLog.textContent = "Collecting cards...";
+
         const cards = [];
         for (const cardElement of document.querySelectorAll('.card:not(.excluded)')) {
             const frontImageElement = cardElement.getElementsByClassName('front')[0];
@@ -515,8 +518,6 @@ const generatePdf = async () => {
 
             cards.push({ front: frontImage, back: backImage });
         }
-
-        const generateLog = document.getElementById('generate-output');
 
         const worker = new Worker('./assets/worker.js');
         worker.onmessage = async (e) => {
@@ -574,8 +575,6 @@ const generatePdf = async () => {
             generateLog.textContent = "Error generating PDF!";
             reject(e);
         }
-
-        generateLog.textContent = "Generating PDF...";
 
         const title = `CardFoldr version of ${pdfname}`;
         worker.postMessage({
@@ -707,6 +706,8 @@ document.getElementById('extractCards').addEventListener('click', async () => {
 });
 
 document.getElementById('generate').addEventListener('click', async () => {
+    document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
+
     const cards = document.getElementsByClassName('card');
     if (cards.length === 0) {
         alert("Please extract the cards first");
@@ -714,8 +715,6 @@ document.getElementById('generate').addEventListener('click', async () => {
     }
 
     clearOutput();
-
-    document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
 
     window.setTimeout(async () => {
         await generatePdf();
@@ -738,7 +737,7 @@ window.onload = async () => {
         element.addEventListener('wheel', (event) => {
             const scrollAmount = parseInt(element.getAttribute('scroll-amount')) || 100;
             if (event.deltaY !== 0) {
-                element.scrollLeft += event.deltaY > 0 ? 100 : -100;
+                element.scrollLeft += event.deltaY > 0 ? scrollAmount : -scrollAmount;
             }
             event.preventDefault();
         });
