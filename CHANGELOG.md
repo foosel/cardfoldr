@@ -1,5 +1,15 @@
 # Changelog
 
+## 2024-05-16
+
+### ✨ Improvements
+
+- Added a quality setting to the card extraction dialog. Can be used to optimize for file size or image quality. Optimizing for file size will greatly reduce the size of the generated PDF (and the speed of extraction and generation) at the cost of some slight quality reduction on the card images (JPEG vs lossless PNG). However it should usually not matter and thus is now the default. Implements #2.
+
+### 🐛 Bug fixes
+
+- The output PDF will now be removed again before generating a new one.
+
 ## 2024-05-15
 
 ### ✨ Improvements

@@ -279,7 +279,8 @@ const rotateImage180 = async (image) => {
     ctx.rotate(Math.PI);
     ctx.drawImage(img, -img.width / 2, -img.height / 2);
 
-    const src = canvas.toDataURL();
+    const mimeType = image.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+    const src = canvas.toDataURL(mimeType);
     return src;
 }
 
@@ -298,8 +299,8 @@ const extractCards = async () => {
     const marginY = parseFloat(document.getElementById('marginY').value);
 
     const backLoc = document.getElementById('backs').value;
-
     const rotateBacks = document.getElementById('rotateBacks').checked;
+    const optimizeFor = document.getElementById('optimize').value;
 
     const scale = 4;
     const orientationClass = (width > height) ? "landscape" : "portrait";
@@ -307,6 +308,7 @@ const extractCards = async () => {
     clearCards();
 
     const cardsContainer = document.getElementById('cards');
+    const mimeType = optimizeFor === "quality" ? "image/png" : "image/jpeg";
 
     let expectedTotal;
     if (backLoc === "lastpage") {
@@ -334,7 +336,7 @@ const extractCards = async () => {
                 await page.render({ canvasContext: ctx, viewport }).promise;
 
                 const cardImage = document.createElement('img');
-                cardImage.src = canvas.toDataURL();
+                cardImage.src = canvas.toDataURL(mimeType);
                 cardImage.className = "front";
                 cardImage.style = `aspect-ratio: ${width} / ${height}`;
 
@@ -386,7 +388,7 @@ const extractCards = async () => {
 
         await backsPage.render({ canvasContext: ctx, viewport }).promise;
 
-        const src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+        const src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
 
         for (let i = 1; i < count; i++) {
             const cardImage = document.getElementById(`card-${i}`).getElementsByClassName('back')[0];
@@ -409,7 +411,7 @@ const extractCards = async () => {
             await backPage.render({ canvasContext: ctx, viewport }).promise;
 
             const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-            cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+            cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
 
             backCount++;
         }
@@ -434,7 +436,7 @@ const extractCards = async () => {
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
                         
                         backCount++;
                     }
@@ -453,7 +455,7 @@ const extractCards = async () => {
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL()) : canvas.toDataURL();
+                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
                         
                         backCount++;
                     }

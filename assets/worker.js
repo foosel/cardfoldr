@@ -268,7 +268,11 @@ if (typeof importScripts === "function") {
         const deduplicationLUT = {};
         const lookupCard = async (card) => {
             if (!deduplicationLUT[card]) {
-                deduplicationLUT[card] = await pdfDoc.embedPng(card);
+                if (card.startsWith("data:image/png;base64,")) {
+                    deduplicationLUT[card] = await pdfDoc.embedPng(card);
+                } else {
+                    deduplicationLUT[card] = await pdfDoc.embedJpg(card);
+                }
             }
             return deduplicationLUT[card];
         }
