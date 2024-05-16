@@ -472,6 +472,7 @@ const clearOutput = () => {
     while (outputContainer.firstChild) {
         outputContainer.removeChild(outputContainer.firstChild);
     }
+    document.getElementById('generate-output').textContent = "";
 }
 
 const humanFileSize = (bytes) => {
@@ -710,7 +711,10 @@ document.getElementById('generate').addEventListener('click', async () => {
         return;
     }
 
+    clearOutput();
+
     document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
+
     window.setTimeout(async () => {
         await generatePdf();
         document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";
