@@ -27,6 +27,76 @@ footer {
     margin-top: 1em;
 }
 
+.width-small {
+    width: 5em;
+}
+
+.min-width-small {
+    min-width: 5em;
+}
+
+.width-medium {
+    width: 10em;
+}
+
+.min-width-medium {
+    min-width: 10em;
+}
+
+input[type="number"]:invalid {
+    border-color: red;
+    color: red;
+}
+
+.pure-form-input {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.pure-form-input input,
+.pure-form-input select {
+    flex: 1 1 auto;
+    width: 100%;
+    border-radius: 0 !important;
+}
+
+.pure-form-input *:first-child {
+    border-top-left-radius: 4px !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+.pure-form-input *:last-child {
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+.pure-form-input span.pure-form-addon {
+    display: inline-block;
+    background-color: #eee;
+    height: 100%;
+    padding: 0.5em 0.6em;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    flex: 0 0 auto;
+}
+
+.pure-form-input input + span.pure-form-addon,
+.pure-form-input select + span.pure-form-addon {
+    border-left-width: 0;
+}
+
+.pure-form-input span.pure-form-addon + input,
+.pure-form-input span.pure-form-addon + select {
+    border-right-width: 0;
+}
+
+.pure-form-input span.pure-form-addon:has(~input[type="number"]:invalid),
+.pure-form-input input[type="number"]:invalid ~ span.pure-form-addon {
+    border-color: red;
+    color: red;
+}
+
 /* pdf rendering */
 
 #pages,

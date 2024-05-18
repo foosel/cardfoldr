@@ -71,13 +71,13 @@
 
                     <div class="pure-control-group">
                         <label for="countX">Count X:</label>
-                        <input type="number" id="countX" min="1" step="1" value="3" />
+                        <input type="number" class="width-medium" id="countX" min="1" step="1" value="3" />
                         <span class="pure-form-message-inline">Number of cards in horizontal direction</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="countY">Count Y:</label>
-                        <input type="number" id="countY" min="1" step="1" value="3" />
+                        <input type="number" class="width-medium" id="countY" min="1" step="1" value="3" />
                         <span class="pure-form-message-inline">Number of cards in vertical direction</span>
                     </div>
                 </fieldset>
@@ -87,63 +87,103 @@
 
                     <div class="pure-control-group">
                         <label for="width">Card width:</label>
-                        <input type="number" id="width" step="0.1" value="63" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="width" class="gridValue" step="0.1" value="63" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="height">Card height:</label>
-                        <input type="number" id="height" step="0.1" value="88" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="height" class="gridValue" step="0.1" value="88" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="startX">Start X:</label>
-                        <input type="number" id="startX" step="0.1" value="10" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="startX" class="gridValue" step="0.1" value="10" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance from the left edge of the page to the left edge of the first card</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="startY">Start Y:</label>
-                        <input type="number" id="startY" step="0.1" value="10" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="startY" class="gridValue" step="0.1" value="10" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance from the top edge of the page to the top edge of the first card</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="marginX">Margin X:</label>
-                        <input type="number" id="marginX" step="0.1" value="0" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="marginX" class="gridValue" step="0.1" value="0" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance between individual cards in horizontal direction</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="marginY">Margin Y:</label>
-                        <input type="number" id="marginY" step="0.1" value="0" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="marginY" class="gridValue" step="0.1" value="0" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance between individual cards in vertical direction</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="cutMargin">Cut margin:</label>
-                        <input type="number" id="cutMargin" min="0" step="0.1" value="0" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="cutMargin" class="gridValue" min="0" step="0.1" value="0" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance from the edge of the card to the cut line</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="stepSize">Step size:</label>
+                        <select class="min-width-medium" id="stepSize">
+                            <option value="1">1mm</option>
+                            <option value="0.5">0.5mm</option>
+                            <option value="0.1" selected>0.1mm</option>
+                            <option value="0.01">0.01mm</option>
+                            <option value="0.001">0.001mm</option>
+                        </select>
+                        <span class="pure-form-message-inline">Step size for the above</span>
                     </div>
                 </fieldset>
 
                 <fieldset>
-                    <legend>Scale & pages</legend>
+                    <legend>Selected pages</legend>
 
                     <div class="pure-control-group">
-                        <label for="scale">Scale:</label>
-                        <input type="number" id="scale" step="0.5" value="1" />
-                    </div>
-
-                    <div class="pure-control-group">
-                        <label for="pageSelection">Pages:</label>
-                        <input type="text" id="pageSelection" placeholder="all" />
+                        <label for="pageSelection">Source pages:</label>
+                        <input type="text" class="width-medium" id="pageSelection" placeholder="all" />
                         <span class="pure-form-message-inline">Comma separated list of pages or ranges of all included pages</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="pageSelection">Background pages (optional):</label>
-                        <input type="text" id="backgroundPageSelection" placeholder="all" />
+                        <input type="text" class="width-medium" id="backgroundPageSelection" placeholder="all" />
                         <span class="pure-form-message-inline">Comma separated list of pages or ranges of all included pages from the background file</span>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Viewer options</legend>
+ 
+                    <div class="pure-control-group">
+                        <label for="scale">Zoom:</label>
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="scale" step="50" value="100" />
+                            <span class="pure-form-addon">%</span>
+                        </div>
                     </div>
                 </fieldset>
 
@@ -165,7 +205,7 @@
             <form id="form-step3" class="pure-form pure-form-aligned" onsubmit="return false">
                 <div class="pure-control-group">
                     <label for="backs">Backs:</label>
-                    <select id="backs">
+                    <select id="backs" class="min-width-medium">
                         <option value="lastpage" selected>Last page</option>
                         <option value="duplex">Duplex (right edge)</option>
                         <option value="duplex2">Duplex (bottom edge)</option>
@@ -176,7 +216,7 @@
 
                 <div class="pure-control-group">
                     <label for="optimize">Optimize for:</label>
-                    <select id="optimize">
+                    <select id="optimize" class="min-width-medium">
                         <option value="filesize">File size</option>
                         <option value="quality">Image quality</option>
                     </select>
@@ -209,7 +249,7 @@
                     <legend>PDF settings</legend>
                     <div class="pure-control-group">
                         <label for="pageSize">Page size:</label>
-                        <select id="pageSize">
+                        <select id="pageSize" class="min-width-medium">
                             <option value="A4" selected>A4</option>
                             <option value="Letter">Letter</option>
                         </select>
@@ -226,7 +266,7 @@
 
                     <div class="pure-control-group">
                         <label for="foldLine">Fold line:</label>
-                        <select id="foldLine">
+                        <select id="foldLine" class="min-width-medium">
                             <option value="vertical" selected>Vertical</option>
                             <option value="horizontal">Horizontal</option>
                         </select>
@@ -235,7 +275,7 @@
 
                     <div class="pure-control-group">
                         <label for="foldLineEdge">Card edge towards foldline:</label>
-                        <select id="foldLineEdge">
+                        <select id="foldLineEdge" class="min-width-medium">
                             <option value="top">Top</option>
                             <option value="bottom" selected>Bottom</option>
                         </select>
@@ -244,18 +284,27 @@
 
                     <div class="pure-control-group">
                         <label for="printerMargin">Printer margin:</label>
-                        <input type="number" id="printerMargin" min="0" step="0.1" value="5" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="printerMargin" min="0" step="0.1" value="5" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="cardMargin">Card margin:</label>
-                        <input type="number" id="cardMargin" min="0" step="0.1" value="2" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="cardMargin" min="0" step="0.1" value="2" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance between individual cards</span>
                     </div>
 
                     <div class="pure-control-group">
                         <label for="foldingMargin">Folding margin:</label>
-                        <input type="number" id="foldingMargin" min="0" step="0.1" value="2" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="foldingMargin" min="0" step="0.1" value="2" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">Distance from the fold line to the edge of the card</span>
                     </div>
                 </fieldset>
@@ -265,7 +314,10 @@
 
                     <div class="pure-control-group">
                         <label for="cutterOffset">Cutter offset (optional):</label>
-                        <input type="number" id="cutterOffset" min="0" step="0.1" value="0" /> mm
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="cutterOffset" min="0" step="0.1" value="0" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
                         <span class="pure-form-message-inline">If your cutter has an offset from the ruler it can be visualized on the cut marks</span>
                     </div>
                 </fieldset>

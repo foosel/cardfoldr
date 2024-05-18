@@ -2,6 +2,10 @@
 
 ## 2024-05-18
 
+## ✨ Improvements
+
+- Support choosing a step size to use for the grid inputs between 1, 0.5, 0.1, 0.01mm and 0.001mm. Should help with source PDFs that used imperial units for defining the grid. Implements #1
+
 ## 🐛 Bug fixes
 
 - Fix support of 0 margins for PDF layout generation. Closes #14.

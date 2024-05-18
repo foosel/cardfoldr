@@ -125,7 +125,7 @@ const refresh = async () => {
     const marginX = parseFloat(document.getElementById('marginX').value);
     const marginY = parseFloat(document.getElementById('marginY').value);
     const cutMargin = parseFloat(document.getElementById('cutMargin').value);
-    const scale = parseFloat(document.getElementById('scale').value);
+    const scale = parseFloat(document.getElementById('scale').value) / 100;
 
     clearPages();
 
@@ -603,6 +603,18 @@ const generatePdf = async () => {
 
 // --- Event listeners ---
 
+const onStepSizeChange = (event) => {
+    const stepSize = document.getElementById("stepSize").value
+    const gridValues = document.getElementsByClassName("gridValue");
+    for (const element of gridValues) {
+        element.setAttribute("step", stepSize);
+    }
+}
+
+document.getElementById("stepSize").addEventListener("change", (event) => {
+    onStepSizeChange();
+})
+
 const onPdfChange = async (event) => {
     pdf = null;
     clearCards();
@@ -723,6 +735,8 @@ document.getElementById('generate').addEventListener('click', async () => {
 });
 
 window.onload = async () => {
+    onStepSizeChange();
+
     const fileElement = document.getElementById('file');
     if (fileElement && fileElement.value) {
         await onPdfChange({ target: fileElement });
