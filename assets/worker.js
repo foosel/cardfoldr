@@ -1,17 +1,31 @@
 if (typeof importScripts === "function") {
     importScripts("./pdf-lib/pdf-lib.min.js");
 
+    const withDefault = (value, defaultValue) => {
+        return value !== undefined ? value : defaultValue;
+    }
+
+    const validated = (value, check, defaultValue) => {
+        if (!check(value)) {
+            if (defaultValue !== undefined) {
+                return defaultValue;
+            }
+            throw new Error("Invalid value: " + value);
+        }
+        return value;
+    }
+
     const insertMark = (page, x, y, options) => {
-        const length = options.length || 2;
-        const margin = options.margin || 1;
-        const color = options.color || PDFLib.grayscale(0);
-        const background = options.background || PDFLib.grayscale(1);
-        const offset = options.offset || PDFLib.grayscale(0.5);
-        const thickness = options.thickness || 0.4;
-        const dashArray = options.dashArray || null;
-        const parts = options.parts || "nesw";
-        const cutterOffset = options.cutterOffset || 0;
-        const mmFactor = options.mmFactor || (72 / 25.4);
+        const length = withDefault(options.length, 2);
+        const margin = withDefault(options.margin, 1);
+        const color = withDefault(options.color, PDFLib.grayscale(0));
+        const background = withDefault(options.background, PDFLib.grayscale(1));
+        const offset = withDefault(options.offset, PDFLib.grayscale(0.5));
+        const thickness = withDefault(options.thickness, 0.4);
+        const dashArray = withDefault(options.dashArray, null);
+        const parts = withDefault(options.parts, "nesw");
+        const cutterOffset = withDefault(options.cutterOffset, 0);
+        const mmFactor = withDefault(options.mmFactor, (72 / 25.4));
     
         const offsetOptions = {
             color: offset,
@@ -165,15 +179,15 @@ if (typeof importScripts === "function") {
         const cardWidth = options.cardWidth;
         const cardHeight = options.cardHeight;
     
-        const cardMargin = options.cardMargin || 2;
-        const cutMargin = options.cutMargin || 0;
-        const foldingMargin = options.foldingMargin || 5;
-        const printerMargin = options.printerMargin || 5;
-        const cutterOffset = options.cutterOffset || 0;
+        const cardMargin = withDefault(options.cardMargin, 2);
+        const cutMargin = withDefault(options.cutMargin, 0);
+        const foldingMargin = withDefault(options.foldingMargin, 5);
+        const printerMargin = withDefault(options.printerMargin, 5);
+        const cutterOffset = withDefault(options.cutterOffset, 0);
     
-        const pageSize = options.pageSize || "A4";
-        const foldLine = options.foldLine || "vertical";
-        const title = options.title || "CardFoldr PDF";
+        const pageSize = validated(options.pageSize, x => PDFLib.PageSizes[x] !== undefined, "A4");
+        const foldLine = validated(options.foldLine, x => ["vertical", "horizontal"].includes(x), "vertical");
+        const title = withDefault(options.title, "CardFoldr PDF");
     
         const pageFormat = PDFLib.PageSizes[pageSize];
     
