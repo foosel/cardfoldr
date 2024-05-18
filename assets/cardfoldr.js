@@ -136,6 +136,32 @@ const refresh = async () => {
     const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
     document.getElementById('coordinates').textContent = coordinateHelp;
 
+    const drawCardGrid = (ctx, countX, countY, width, height, startX, startY, marginX, marginY, pageWidth, pageHeight, mmFactor) => {
+        for (let x = 0; x <= countX; x++) {
+            for (let y = 0; y <= countY; y++) {
+                // verticals
+                const gridX = (startX + x * width + (x > 0 ? (x - 1) * marginX : 0)) / mmFactor;
+                ctx.moveTo(gridX, 0);
+                ctx.lineTo(gridX, pageHeight);
+
+                if (marginX > 0 && x > 0 && x < countX) {
+                    ctx.moveTo(gridX + marginX / mmFactor, 0);
+                    ctx.lineTo(gridX + marginX / mmFactor, pageHeight);
+                }
+
+                // horizontals
+                const gridY = (startY + y * height + (y > 0 ? (y - 1) * marginY : 0)) / mmFactor;
+                ctx.moveTo(0, gridY);
+                ctx.lineTo(pageWidth, gridY);
+
+                if (marginY > 0 && y > 0 && y < countY) {
+                    ctx.moveTo(0, gridY + marginY / mmFactor);
+                    ctx.lineTo(pageWidth, gridY + marginY / mmFactor);
+                }
+            }
+        }
+    }
+
     const drawPage = async (page) => {
         const viewport = page.getViewport({ scale });
         const mmFactor = page.userUnit / 72 * 25.4 / scale;
@@ -151,29 +177,8 @@ const refresh = async () => {
         ctx.beginPath();
         ctx.lineWidth = 0.4 / mmFactor;
         ctx.strokeStyle = 'red';
-        ctx.setLineDash([5, 5]);
-        ctx.rect(startX / mmFactor, startY / mmFactor, (width * countX + marginX * (countX - 1)) / mmFactor, (height * countY + marginY * (countY - 1)) / mmFactor);
-        for (let x = 1; x < countX; x++) {
-            for (let y = 1; y < countY; y++) {
-                // verticals
-                ctx.moveTo((startX + x * width + (x - 1) * marginX) / mmFactor, startY / mmFactor);
-                ctx.lineTo((startX + x * width + (x - 1) * marginX) / mmFactor, (startY + countY * height + marginY * (countY - 1)) / mmFactor);
-
-                if (marginX > 0) {
-                    ctx.moveTo((startX + x * width + x * marginX) / mmFactor, startY / mmFactor);
-                    ctx.lineTo((startX + x * width + x * marginX) / mmFactor, (startY + countY * height + marginY * (countY - 1)) / mmFactor);
-                }
-
-                // horizontals
-                ctx.moveTo(startX / mmFactor, (startY + y * height + (y - 1) * marginY) / mmFactor);
-                ctx.lineTo((startX + countX * width + marginX * (countX - 1)) / mmFactor, (startY + y * height + (y - 1) * marginY) / mmFactor);
-
-                if (marginY > 0) {
-                    ctx.moveTo(startX / mmFactor, (startY + y * height + y * marginY) / mmFactor);
-                    ctx.lineTo((startX + countX * width + marginX * (countX - 1)) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
-                }
-            }
-        }
+        ctx.setLineDash([10, 10])
+        drawCardGrid(ctx, countX, countY, width, height, startX, startY, marginX, marginY, canvas.width, canvas.height, mmFactor);
         ctx.stroke();
 
         // draw cut margin

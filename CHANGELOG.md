@@ -5,6 +5,7 @@
 ## ✨ Improvements
 
 - Support choosing a step size to use for the grid inputs between 1, 0.5, 0.1, 0.01mm and 0.001mm. Should help with source PDFs that used imperial units for defining the grid. Implements #1
+- Extended grid lines to page edges to improve their visibility.
 
 ## 🐛 Bug fixes
 
