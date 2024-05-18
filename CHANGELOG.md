@@ -10,6 +10,7 @@
 ## 🐛 Bug fixes
 
 - Fix support of 0 margins for PDF layout generation. Closes #14.
+- Fix card auto orientation algorithm.
 
 ## 2024-05-16
 

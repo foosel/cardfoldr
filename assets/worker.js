@@ -204,7 +204,7 @@ if (typeof importScripts === "function") {
 
         let maxCardsPerPage, rotate, totalHeight, totalWidth;
         if (foldLine === "vertical") {
-            if (cardWidth < usableHalf && cardHeight < usableHalf) {
+            if (cardWidthDoc < usableHalf && cardHeightDoc < usableHalf) {
                 // card fits on half of the page in both orientations, lets figure out how many cards we can fit
                 const cardsPerPageWidth = Math.floor(usableHeight / (cardWidthDoc + cardMarginDoc));
                 const cardsPerPageHeight = Math.floor(usableHeight / (cardHeightDoc + cardMarginDoc));
@@ -216,11 +216,11 @@ if (typeof importScripts === "function") {
                     maxCardsPerPage = cardsPerPageWidth;
                     rotate = true;
                 }
-            } else if (cardWidth < usableHalf) {
+            } else if (cardWidthDoc < usableHalf) {
                 // card fits on half of the page in width, but not height
                 maxCardsPerPage = Math.floor(usableHeight / cardHeightDoc);
                 rotate = false;
-            } else if (cardHeight < usableHalf) {
+            } else if (cardHeightDoc < usableHalf) {
                 // card fits on half of the page in height, but not width
                 maxCardsPerPage = Math.floor(usableWidth / cardWidthDoc);
                 rotate = true;
