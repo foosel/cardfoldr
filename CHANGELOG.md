@@ -1,5 +1,11 @@
 # Changelog
 
+## 2024-05-18
+
+## 🐛 Bug fixes
+
+- Fix support of 0 margins for PDF layout generation. Closes #14.
+
 ## 2024-05-16
 
 ### ✨ Improvements
