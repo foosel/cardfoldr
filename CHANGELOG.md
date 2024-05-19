@@ -1,16 +1,22 @@
 # Changelog
 
+## 2024-05-19
+
+## ✨ Improvements
+
+- Improved performance of grid updates.
+
 ## 2024-05-18
 
 ## ✨ Improvements
 
-- Support choosing a step size to use for the grid inputs between 1, 0.5, 0.1, 0.01mm and 0.001mm. Should help with source PDFs that used imperial units for defining the grid. Implements #1
+- Added support for choosing a step size to use for the grid inputs between 1, 0.5, 0.1, 0.01mm and 0.001mm. Should help with source PDFs that used imperial units for defining the grid. Implements #1
 - Extended grid lines to page edges to improve their visibility.
 
 ## 🐛 Bug fixes
 
-- Fix support of 0 margins for PDF layout generation. Closes #14.
-- Fix card auto orientation algorithm.
+- Fixed support of 0 margins for PDF layout generation. Closes #14.
+- Fixed card auto orientation algorithm.
 
 ## 2024-05-16
 

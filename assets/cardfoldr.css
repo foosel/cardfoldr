@@ -105,12 +105,14 @@ input[type="number"]:invalid {
     flex-wrap: nowrap;
     max-width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .page {
     display: flex;
     flex-direction: column;
     margin: 1em;
+    border: 1px solid black;
 }
 
 .page .page-info {
@@ -126,8 +128,16 @@ input[type="number"]:invalid {
     opacity: 0.5;
 }
 
-.page canvas {
-    border: 1px solid black;
+.page .grid-container {
+    position: relative;
+}
+
+.page .grid-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     cursor: crosshair;
 }
 

@@ -99,6 +99,8 @@ const toPageSelection = (selected, pageCount) => {
 
 // --- PDF rendering ---
 
+let _currentScale;
+
 const updatePageSelection = (which) => {
     if (which === "pdf" && pdf) {
         const pagesContainer = document.getElementById('pages');
@@ -111,7 +113,96 @@ const updatePageSelection = (which) => {
     }
 }
 
-const refresh = async () => {
+const drawGrid = (ctx, countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor) => {
+    // draw card grid
+    ctx.beginPath();
+    ctx.lineWidth = 0.4 / mmFactor;
+    ctx.strokeStyle = 'red';
+    ctx.setLineDash([10, 10])
+    for (let x = 0; x <= countX; x++) {
+        for (let y = 0; y <= countY; y++) {
+            // verticals
+            const gridX = (startX + x * width + (x > 0 ? (x - 1) * marginX : 0)) / mmFactor;
+            ctx.moveTo(gridX, 0);
+            ctx.lineTo(gridX, ctx.canvas.height);
+
+            if (marginX > 0 && x > 0 && x < countX) {
+                ctx.moveTo(gridX + marginX / mmFactor, 0);
+                ctx.lineTo(gridX + marginX / mmFactor, ctx.canvas.height);
+            }
+
+            // horizontals
+            const gridY = (startY + y * height + (y > 0 ? (y - 1) * marginY : 0)) / mmFactor;
+            ctx.moveTo(0, gridY);
+            ctx.lineTo(ctx.canvas.width, gridY);
+
+            if (marginY > 0 && y > 0 && y < countY) {
+                ctx.moveTo(0, gridY + marginY / mmFactor);
+                ctx.lineTo(ctx.canvas.width, gridY + marginY / mmFactor);
+            }
+        }
+    }
+    ctx.stroke();
+
+    // draw cut margin
+    if (cutMargin > 0) {
+        ctx.beginPath();
+        ctx.lineWidth = 0.4 / mmFactor;
+        ctx.strokeStyle = 'blue';
+        ctx.setLineDash([5, 5]);
+        for (let x = 0; x < countX; x++) {
+            for (let y = 0; y < countY; y++) {
+                const rectX = startX + x * width + x * marginX + cutMargin;
+                const rectY = startY + y * height + y * marginY + cutMargin;
+                ctx.rect(rectX / mmFactor, rectY / mmFactor, (width - 2 * cutMargin) / mmFactor, (height - 2 * cutMargin) / mmFactor);
+            }
+        }
+        ctx.stroke();
+    }
+}
+
+const drawPage = async (page, scale) => {
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    return canvas;
+}
+
+const refreshGrid = async () => {
+    const countX = parseInt(document.getElementById('countX').value);
+    const countY = parseInt(document.getElementById('countY').value);
+    const startX = parseFloat(document.getElementById('startX').value);
+    const startY = parseFloat(document.getElementById('startY').value);
+    const width = parseFloat(document.getElementById('width').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const marginX = parseFloat(document.getElementById('marginX').value);
+    const marginY = parseFloat(document.getElementById('marginY').value);
+    const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+    
+    const scale = parseFloat(document.getElementById('scale').value) / 100;
+    if (_currentScale !== scale) {
+        _currentScale = scale;
+        await refreshPdf();
+    } else {
+        const frontCanvases = document.querySelectorAll("#pages .grid-container canvas");
+        const backCanvases = document.querySelectorAll("#pages-back .grid-container canvas");
+
+        for (const canvas of [...frontCanvases, ...backCanvases]) {
+            const mmFactor = parseFloat(canvas.getAttribute("mm-factor"));
+            const ctx = canvas.getContext('2d');
+            ctx.reset();
+            drawGrid(ctx, countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor);
+        }
+    }
+};
+
+const refreshPdf = async () => {
     if (!pdf) {
         return;
     }
@@ -125,7 +216,9 @@ const refresh = async () => {
     const marginX = parseFloat(document.getElementById('marginX').value);
     const marginY = parseFloat(document.getElementById('marginY').value);
     const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+
     const scale = parseFloat(document.getElementById('scale').value) / 100;
+    _currentScale = scale;
 
     clearPages();
 
@@ -136,81 +229,49 @@ const refresh = async () => {
     const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
     document.getElementById('coordinates').textContent = coordinateHelp;
 
-    const drawCardGrid = (ctx, countX, countY, width, height, startX, startY, marginX, marginY, pageWidth, pageHeight, mmFactor) => {
-        for (let x = 0; x <= countX; x++) {
-            for (let y = 0; y <= countY; y++) {
-                // verticals
-                const gridX = (startX + x * width + (x > 0 ? (x - 1) * marginX : 0)) / mmFactor;
-                ctx.moveTo(gridX, 0);
-                ctx.lineTo(gridX, pageHeight);
-
-                if (marginX > 0 && x > 0 && x < countX) {
-                    ctx.moveTo(gridX + marginX / mmFactor, 0);
-                    ctx.lineTo(gridX + marginX / mmFactor, pageHeight);
-                }
-
-                // horizontals
-                const gridY = (startY + y * height + (y > 0 ? (y - 1) * marginY : 0)) / mmFactor;
-                ctx.moveTo(0, gridY);
-                ctx.lineTo(pageWidth, gridY);
-
-                if (marginY > 0 && y > 0 && y < countY) {
-                    ctx.moveTo(0, gridY + marginY / mmFactor);
-                    ctx.lineTo(pageWidth, gridY + marginY / mmFactor);
-                }
-            }
-        }
-    }
-
-    const drawPage = async (page) => {
-        const viewport = page.getViewport({ scale });
-        const mmFactor = page.userUnit / 72 * 25.4 / scale;
-
-        const canvas = document.createElement('canvas');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        // draw card grid
-        ctx.beginPath();
-        ctx.lineWidth = 0.4 / mmFactor;
-        ctx.strokeStyle = 'red';
-        ctx.setLineDash([10, 10])
-        drawCardGrid(ctx, countX, countY, width, height, startX, startY, marginX, marginY, canvas.width, canvas.height, mmFactor);
-        ctx.stroke();
-
-        // draw cut margin
-        if (cutMargin > 0) {
-            ctx.beginPath();
-            ctx.lineWidth = 0.4 / mmFactor;
-            ctx.strokeStyle = 'blue';
-            ctx.setLineDash([5, 5]);
-            for (let x = 0; x < countX; x++) {
-                for (let y = 0; y < countY; y++) {
-                    const rectX = startX + x * width + x * marginX + cutMargin;
-                    const rectY = startY + y * height + y * marginY + cutMargin;
-                    ctx.rect(rectX / mmFactor, rectY / mmFactor, (width - 2 * cutMargin) / mmFactor, (height - 2 * cutMargin) / mmFactor);
-                }
-            }
-            ctx.stroke();
-        }
-
-        return canvas;
-    }
-
     const renderPages = async (pdfDoc, container, id, prefix, included) => {
         for (let p = 1; p <= pdfDoc.numPages; p++) {
             const page = await pdfDoc.getPage(p);
             const viewport = page.getViewport({ scale });
             const mmFactor = page.userUnit / 72 * 25.4 / scale;
 
-            const canvas = await drawPage(page);
+            const canvas = await drawPage(page, scale);
+            const pageUri = canvas.toDataURL("image/jpeg");
 
             const pageElement = document.createElement('div');
             pageElement.id = `${id}-${p}`;
             pageElement.classList = "page" + (included == null || included.includes(p) ? "" : " excluded");
+
+            const pageImage = document.createElement('img');
+            pageImage.src = pageUri;
+
+            const gridCanvas = document.createElement('canvas');
+            gridCanvas.height = canvas.height;
+            gridCanvas.width = canvas.width;
+            gridCanvas.setAttribute("mm-factor", mmFactor);
+
+            drawGrid(gridCanvas.getContext('2d'), countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor);
+
+            gridCanvas.addEventListener("mousemove", (event) => {
+                const rect = event.target.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                const xCoord = roundValue(x * mmFactor, 1);
+                const yCoord = roundValue(y * mmFactor, 1);
+                const xDist = roundValue(xCoord - startX, 1);
+                const yDist = roundValue(yCoord - startY, 1);
+
+                document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm (${xDist} x ${yDist} mm from start)`;
+            });
+            gridCanvas.addEventListener("mouseleave", () => {
+                document.getElementById('coordinates').textContent = coordinateHelp;
+            });
+
+            const gridContainer = document.createElement('div');
+            gridContainer.className = "grid-container";
+            gridContainer.appendChild(pageImage);
+            gridContainer.appendChild(gridCanvas);
 
             const toggleExcluded = () => {
                 pageInfoTop.parentElement.classList.toggle("excluded");
@@ -226,25 +287,10 @@ const refresh = async () => {
             pageInfoBottom.addEventListener("click", toggleExcluded);
 
             pageElement.appendChild(pageInfoTop);
-            pageElement.appendChild(canvas);
+            pageElement.appendChild(gridContainer);
             pageElement.appendChild(pageInfoBottom);
             container.appendChild(pageElement);
 
-            canvas.addEventListener("mousemove", (event) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-
-                const xCoord = roundValue(x * mmFactor, 1);
-                const yCoord = roundValue(y * mmFactor, 1);
-                const xDist = roundValue(xCoord - startX, 1);
-                const yDist = roundValue(yCoord - startY, 1);
-
-                document.getElementById('coordinates').textContent = `Mouse at ${xCoord} x ${yCoord} mm (${xDist} x ${yDist} mm from start)`;
-            });
-            canvas.addEventListener("mouseleave", () => {
-                document.getElementById('coordinates').textContent = coordinateHelp;
-            });
         }
     }
 
@@ -631,7 +677,7 @@ const onPdfChange = async (event) => {
     pdfname = event.target.files[0].name;
     pdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
     document.getElementById("downloadFilename").value = pdfname.replace(/\.pdf$/i, ".foldable.pdf");
-    await refresh();
+    await refreshPdf();
 }
 
 document.getElementById('file').addEventListener('change', async (event) => {
@@ -651,7 +697,7 @@ const onBackgroundPdfChange = async (event) => {
         return;
     }
     backgroundPdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
-    await refresh();
+    await refreshPdf();
 }
 
 document.getElementById('background').addEventListener('change', async (event) => {
@@ -661,7 +707,7 @@ document.getElementById('background').addEventListener('change', async (event) =
 document.getElementById('remove-background').addEventListener('click', async () => {
     document.getElementById('background').value = null;
     await onBackgroundPdfChange();
-    await refresh();
+    await refreshPdf();
 });
 
 document.getElementById('refresh').addEventListener('click', async () => {
@@ -671,7 +717,7 @@ document.getElementById('refresh').addEventListener('click', async () => {
     }
     clearCards();
     clearOutput();
-    await refresh();
+    await refreshGrid();
 
     if (document.getElementById("autoExtract").checked) {
         document.getElementById('extractCards').click();
