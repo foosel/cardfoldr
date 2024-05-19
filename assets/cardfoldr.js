@@ -174,6 +174,32 @@ const drawPage = async (page, scale) => {
     return canvas;
 }
 
+const refreshPageSelection = async () => {
+    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
+
+    const pagesContainer = document.getElementById('pages');
+    const backgroundContainer = document.getElementById('pages-back');
+
+    for (const page of pagesContainer.querySelectorAll('.page')) {
+        const p = parseInt(page.id.split('-')[1]);
+        if (pageSelection.includes(p)) {
+            page.classList.remove("excluded");
+        } else {
+            page.classList.add("excluded");
+        }
+    }
+
+    for (const page of backgroundContainer.querySelectorAll('.page')) {
+        const p = parseInt(page.id.split('-')[2]);
+        if (backgroundPageSelection.includes(p)) {
+            page.classList.remove("excluded");
+        } else {
+            page.classList.add("excluded");
+        }
+    }
+}
+
 const refreshGrid = async () => {
     const countX = parseInt(document.getElementById('countX').value);
     const countY = parseInt(document.getElementById('countY').value);
@@ -199,6 +225,8 @@ const refreshGrid = async () => {
             ctx.reset();
             drawGrid(ctx, countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor);
         }
+
+        refreshPageSelection();
     }
 };
 
