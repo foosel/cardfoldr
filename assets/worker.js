@@ -119,7 +119,7 @@ if (typeof importScripts === "function") {
                 insertMark(page, markX2, markY, { parts: partsRight, ...tickOptions });
                 insertMark(page, markX3, markY, { parts: partsLeft, ...tickOptions });
                 insertMark(page, markX4, markY, { parts: partsRight, ...tickOptions });
-                if (cardMargin > 0 && i < cardPerPage - 1) {
+                if ((cardMargin > 0 || cutMargin > 0) && i < cardPerPage - 1) {
                     const markY2 = markY - unitHeightDoc + 2 * cutMarginDoc;
                     insertMark(page, markX1, markY2, { parts: cardMargin && cutMargin ? "sw" : "w", ...tickOptions});
                     insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "e", ...tickOptions});
@@ -158,7 +158,7 @@ if (typeof importScripts === "function") {
                 insertMark(page, markX, markY2, { parts: partsDown });
                 insertMark(page, markX, markY3, { parts: partsUp });
                 insertMark(page, markX, markY4, { parts: partsDown });
-                if (cardMargin > 0 && i < cardPerPage - 1) {
+                if ((cardMargin > 0 || cutMargin > 0) && i < cardPerPage - 1) {
                     const markX2 = markX + unitWidthDoc - 2 * cutMarginDoc;
                     insertMark(page, markX2, markY1, { parts: cardMargin && cutMargin ? "ne" : "n"});
                     insertMark(page, markX2, markY2, { parts: cardMargin && cutMargin ? "se" : "s"});

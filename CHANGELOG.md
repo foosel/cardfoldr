@@ -1,5 +1,11 @@
 # Changelog
 
+## 2024-05-20
+
+## 🐛 Bug fixes
+
+- Fixed cut mark generation for no card but cut margin.
+
 ## 2024-05-19
 
 ## ✨ Improvements
