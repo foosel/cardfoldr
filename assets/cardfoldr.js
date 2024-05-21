@@ -115,48 +115,56 @@ const updatePageSelection = (which) => {
 
 const drawGrid = (ctx, countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor) => {
     // draw card grid
+    const drawCardGrid = () => {
+        for (let x = 0; x <= countX; x++) {
+            for (let y = 0; y <= countY; y++) {
+                // verticals
+                const gridX = (startX + x * width + (x > 0 ? (x - 1) * marginX : 0)) / mmFactor;
+                ctx.moveTo(gridX, 0);
+                ctx.lineTo(gridX, ctx.canvas.height);
+    
+                if (marginX > 0 && x > 0 && x < countX) {
+                    ctx.moveTo(gridX + marginX / mmFactor, 0);
+                    ctx.lineTo(gridX + marginX / mmFactor, ctx.canvas.height);
+                }
+    
+                // horizontals
+                const gridY = (startY + y * height + (y > 0 ? (y - 1) * marginY : 0)) / mmFactor;
+                ctx.moveTo(0, gridY);
+                ctx.lineTo(ctx.canvas.width, gridY);
+    
+                if (marginY > 0 && y > 0 && y < countY) {
+                    ctx.moveTo(0, gridY + marginY / mmFactor);
+                    ctx.lineTo(ctx.canvas.width, gridY + marginY / mmFactor);
+                }
+            }
+        }
+    }
+
     ctx.beginPath();
     ctx.lineWidth = 0.4 / mmFactor;
     ctx.strokeStyle = 'red';
     ctx.setLineDash([10, 10])
-    for (let x = 0; x <= countX; x++) {
-        for (let y = 0; y <= countY; y++) {
-            // verticals
-            const gridX = (startX + x * width + (x > 0 ? (x - 1) * marginX : 0)) / mmFactor;
-            ctx.moveTo(gridX, 0);
-            ctx.lineTo(gridX, ctx.canvas.height);
-
-            if (marginX > 0 && x > 0 && x < countX) {
-                ctx.moveTo(gridX + marginX / mmFactor, 0);
-                ctx.lineTo(gridX + marginX / mmFactor, ctx.canvas.height);
-            }
-
-            // horizontals
-            const gridY = (startY + y * height + (y > 0 ? (y - 1) * marginY : 0)) / mmFactor;
-            ctx.moveTo(0, gridY);
-            ctx.lineTo(ctx.canvas.width, gridY);
-
-            if (marginY > 0 && y > 0 && y < countY) {
-                ctx.moveTo(0, gridY + marginY / mmFactor);
-                ctx.lineTo(ctx.canvas.width, gridY + marginY / mmFactor);
-            }
-        }
-    }
+    drawCardGrid();
     ctx.stroke();
 
     // draw cut margin
     if (cutMargin > 0) {
+        const drawCutMargin = () => {
+            for (let x = 0; x < countX; x++) {
+                for (let y = 0; y < countY; y++) {
+                    const rectX = startX + x * width + x * marginX + cutMargin;
+                    const rectY = startY + y * height + y * marginY + cutMargin;
+                    ctx.rect(rectX / mmFactor, rectY / mmFactor, (width - 2 * cutMargin) / mmFactor, (height - 2 * cutMargin) / mmFactor);
+                }
+            }
+        }
+
         ctx.beginPath();
         ctx.lineWidth = 0.4 / mmFactor;
         ctx.strokeStyle = 'blue';
         ctx.setLineDash([5, 5]);
-        for (let x = 0; x < countX; x++) {
-            for (let y = 0; y < countY; y++) {
-                const rectX = startX + x * width + x * marginX + cutMargin;
-                const rectY = startY + y * height + y * marginY + cutMargin;
-                ctx.rect(rectX / mmFactor, rectY / mmFactor, (width - 2 * cutMargin) / mmFactor, (height - 2 * cutMargin) / mmFactor);
-            }
-        }
+        drawCutMargin();
         ctx.stroke();
     }
 }
@@ -687,7 +695,7 @@ const generatePdf = async () => {
 
 const onStepSizeChange = (event) => {
     const stepSize = document.getElementById("stepSize").value
-    const gridValues = document.getElementsByClassName("gridValue");
+    const gridValues = document.getElementsByClassName("grid-value");
     for (const element of gridValues) {
         element.setAttribute("step", stepSize);
     }
@@ -696,6 +704,10 @@ const onStepSizeChange = (event) => {
 document.getElementById("stepSize").addEventListener("change", (event) => {
     onStepSizeChange();
 })
+
+for (const element of document.getElementsByClassName("grid-definition")) {
+    element.addEventListener('change', async () => { await refreshGrid() });
+}
 
 const onPdfChange = async (event) => {
     pdf = null;

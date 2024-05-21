@@ -1,5 +1,12 @@
 # Changelog
 
+## 2024-05-21
+
+### ✨ Improvements
+
+- Automatically update the card grid visualization on input changes, for easier turn around.
+- Made the grid settings more compact to make it easier to see the grid and the cards at the same time.
+
 ### 🐛 Bug fixes
 
 - Fixed coordinate display for offset from start point.
