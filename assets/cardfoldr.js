@@ -281,6 +281,9 @@ const refreshPdf = async () => {
             drawGrid(gridCanvas.getContext('2d'), countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor);
 
             gridCanvas.addEventListener("mousemove", (event) => {
+                const startX = parseFloat(document.getElementById('startX').value);
+                const startY = parseFloat(document.getElementById('startY').value);
+
                 const rect = event.target.getBoundingClientRect();
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
