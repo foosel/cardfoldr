@@ -701,6 +701,14 @@ const onStepSizeChange = (event) => {
     }
 }
 
+const generateQuery = () => {
+    const query = new URLSearchParams();
+    document.querySelectorAll('[data-query]').forEach(element => {
+        query.set(element.getAttribute('data-query'), element.type === "checkbox" ? element.checked : element.value);
+    });
+    return query.toString();
+}
+
 document.getElementById("stepSize").addEventListener("change", (event) => {
     onStepSizeChange();
 })
@@ -829,18 +837,41 @@ document.getElementById('generate').addEventListener('click', async () => {
 });
 
 window.onload = async () => {
+    // pre-fill from query parameters
+    for (const [key, value] of (new URL(document.location.toString()).searchParams)) {
+        const element = document.querySelector(`[data-query="${key}"]`);
+        if (element) {
+            if (element.type === "checkbox") {
+                element.checked = value === "true";
+            } else {
+                element.value = value;
+            }
+        }
+    };
+
+    // sync query parameters
+    document.querySelectorAll('[data-query]').forEach(element => {
+        element.addEventListener('change', () => {
+            history.replaceState(null, "", "?" + generateQuery());
+        });
+    });
+
+    // sync step size
     onStepSizeChange();
 
+    // load source PDF
     const fileElement = document.getElementById('file');
     if (fileElement && fileElement.value) {
         await onPdfChange({ target: fileElement });
     }
 
+    // load back PDF
     const backgroundElement = document.getElementById('background');
     if (backgroundElement && backgroundElement.value) {
         await onBackgroundPdfChange({ target: backgroundElement });
     }
 
+    // add horizontal scrolling
     for (const element of document.getElementsByClassName("scroll-horizontal")) {
         element.addEventListener('wheel', (event) => {
             const scrollAmount = parseInt(element.getAttribute('scroll-amount')) || 100;

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2024-05-22
+
+### ✨ Improvements
+
+- Pre-fill settings from query parameters, and sync setting changes to query parameters. This allows for sharing the current state of the app with others by just sharing the URL. Prepares things for #4.
+- Added some margin to the page on mobile.
+
 ## 2024-05-21
 
 ### ✨ Improvements
