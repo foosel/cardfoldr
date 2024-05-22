@@ -183,6 +183,10 @@ const drawPage = async (page, scale) => {
 }
 
 const refreshPageSelection = async () => {
+    if (!pdf) {
+        return;
+    }
+
     const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
     const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
@@ -691,6 +695,161 @@ const generatePdf = async () => {
     return promise;
 }
 
+// --- Presets ---
+
+const generatePresetData = () => {
+    const data = {};
+    document.querySelectorAll('[data-preset]').forEach(element => {
+        data[element.getAttribute('data-preset')] = element.type === "checkbox" ? element.checked : element.value;
+    });
+    return data;
+}
+
+const applyPresetData = (data) => {
+    for (const key in data) {
+        const element = document.querySelector(`[data-preset="${key}"]`);
+        if (element) {
+            if (element.type === "checkbox") {
+                element.checked = data[key];
+            } else {
+                element.value = data[key];
+            }
+        }
+    }
+}
+
+const toStorageKey = (key) => {
+    return `preset-${key}`;
+}
+
+const keyFromName = (name) => {
+    return name.toLowerCase().replace(/[^a-z0-9]/ig, '-');
+}
+
+const loadPreset = async (key) => {
+    const data = _getPreset(toStorageKey(key));
+    if (data) {
+        applyPresetData(data);
+    }
+    document.getElementById("updatePreset").disabled = true;
+    await refreshGrid();
+}
+
+const savePreset = (key, name) => {
+    const data = generatePresetData();
+    data["_key"] = key;
+    data["_name"] = name;
+
+    localStorage.setItem(toStorageKey(key), JSON.stringify(data));
+}
+
+const updatePreset = (key) => {
+    const preset = _getPreset(toStorageKey(key));
+    if (preset === null) {
+        return;
+    }
+
+    savePreset(key, preset["_name"]);
+    document.getElementById("updatePreset").disabled = true;
+}
+
+const deletePreset = (key) => {
+    localStorage.removeItem(toStorageKey(key));
+}
+
+const _getPreset = (key) => {
+    const data = localStorage.getItem(key);
+    if (data) {
+        return JSON.parse(data);
+    }
+    return null;
+}
+
+const getAllPresets = () => {
+    const keys = Object.keys(localStorage).filter(x => x.startsWith("preset-"));
+
+    // sort by name
+    keys.sort((a, b) => {
+        const nameA = JSON.parse(localStorage.getItem(a))["_name"];
+        const nameB = JSON.parse(localStorage.getItem(b))["_name"];
+        return nameA.localeCompare(nameB);
+    });
+
+    return keys.map(x => JSON.parse(localStorage.getItem(x)));
+}
+
+const refreshPresetList = (key) => {
+    const presets = getAllPresets();
+    const presetSelect = document.getElementById("preset");
+    while (presetSelect.firstChild) {
+        presetSelect.removeChild(presetSelect.firstChild);
+    }
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Custom...";
+    if (!key || key === "") {
+        defaultOption.selected = true;
+    }
+    presetSelect.appendChild(defaultOption);
+
+    for (const preset of presets) {
+        const option = document.createElement("option");
+        option.value = preset["_key"];
+        option.textContent = preset["_name"];
+        if (key === preset["_key"]) {
+            option.selected = true;
+        }
+        presetSelect.appendChild(option);
+    }
+}
+
+document.querySelectorAll('[data-preset]').forEach(element => {
+    element.addEventListener('change', () => {
+        document.getElementById("updatePreset").disabled = false;
+    });
+});
+
+document.getElementById("preset").addEventListener("change", async (event) => {
+    const key = event.target.value;
+    if (key === "") {
+        document.getElementById("deletePreset").disabled = true;
+        return;
+    }
+
+    document.getElementById("deletePreset").disabled = false;
+    await loadPreset(key);
+});
+
+document.getElementById("saveNewPreset").addEventListener("click", (event) => {
+    const presetName = prompt("Please enter a name for the preset");
+    if (presetName) {
+        const key = keyFromName(presetName);
+        savePreset(key, presetName);
+        refreshPresetList(key);
+    }
+});
+
+document.getElementById("updatePreset").addEventListener("click", (event) => {
+    const key = document.getElementById("preset").value;
+    if (key === "") {
+        return;
+    }
+    updatePreset(key);
+});
+
+document.getElementById("deletePreset").addEventListener("click", (event) => {
+    const key = document.getElementById("preset").value;
+    if (key === "") {
+        return;
+    }
+
+    if (confirm("Are you sure you want to delete this preset?")) {
+        deletePreset(key);
+        refreshPresetList();
+    }
+});
+
 // --- Event listeners ---
 
 const onStepSizeChange = (event) => {
@@ -881,4 +1040,7 @@ window.onload = async () => {
             event.preventDefault();
         });
     }
+
+    // load presets
+    refreshPresetList();
 };

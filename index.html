@@ -51,9 +51,6 @@
                     <input type="file" id="background" accept=".pdf" />
                     <a id="remove-background" href="javascript:void(0)"><i class="fa fa-trash"></i> Remove Background</a>
                 </fieldset>
-
-                <div class="pure-controls">
-                </div>
             </form>
 
             <!-- Grid creation -->
@@ -67,14 +64,28 @@
 
             <form id="form-step2" class="pure-form pure-form-aligned" onsubmit="return false">
                 <fieldset>
+                    <legend>Presets</legend>
+
+                    <div class="pure-control-group">
+                        <label for="preset">Choose a preset (optional):</label>
+                        <select id="preset" class="min-width-large">
+                            <option selected>Custom...</option>
+                        </select>
+                        <button id="updatePreset" class="pure-button" title="Save preset" disabled="true"><i class="fa fa-save"></i></button>
+                        <button id="deletePreset" class="pure-button" title="Delete preset" disabled="true"><i class="fa fa-trash"></i></button>
+                        <button id="saveNewPreset" class="pure-button" title="Save as..."><i class="fa fa-plus"></i></button>
+                    </div>
+                </fieldset>
+
+                <fieldset>
                     <legend>Card grid definition</legend>
 
                     <div class="pure-control-group">
                         <label for="countX">Grid size:</label>
                         <div class="pure-form-input">
-                            <input type="number" class="grid-definition width-medium" id="countX" min="1" step="1" value="3" data-query="grid-count-x" />
+                            <input type="number" class="grid-definition width-medium" id="countX" min="1" step="1" value="3" data-query="grid-count-x" data-preset="grid-count-x" />
                             <span class="pure-form-addon">x</span>
-                            <input type="number" class="grid-definition width-medium" id="countY" min="1" step="1" value="3" data-query="grid-count-y" />
+                            <input type="number" class="grid-definition width-medium" id="countY" min="1" step="1" value="3" data-query="grid-count-y" data-preset="grid-count-y" />
                             <span class="pure-form-addon">cards</span>
                         </div>
                     </div>
@@ -82,9 +93,9 @@
                     <div class="pure-control-group">
                         <label for="width">Card size:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="width" class="grid-value grid-definition width-medium" step="0.1" value="63" data-query="grid-width" />
+                            <input type="number" id="width" class="grid-value grid-definition width-medium" step="0.1" value="63" data-query="grid-width" data-preset="grid-width" />
                             <span class="pure-form-addon">x</span>
-                            <input type="number" id="height" class="grid-value grid-definition width-medium" step="0.1" value="88" data-query="grid-height" />
+                            <input type="number" id="height" class="grid-value grid-definition width-medium" step="0.1" value="88" data-query="grid-height" data-preset="grid-height" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                     </div>
@@ -92,9 +103,9 @@
                     <div class="pure-control-group">
                         <label for="startX">Start point:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="startX" class="grid-value grid-definition grid-definition width-medium" step="0.1" value="10" data-query="grid-start-x" />
+                            <input type="number" id="startX" class="grid-value grid-definition grid-definition width-medium" step="0.1" value="10" data-query="grid-start-x" data-preset="grid-start-x" />
                             <span class="pure-form-addon">x</span>
-                            <input type="number" id="startY" class="grid-value grid-definition grid-definition width-medium" step="0.1" value="10" data-query="grid-start-y" />
+                            <input type="number" id="startY" class="grid-value grid-definition grid-definition width-medium" step="0.1" value="10" data-query="grid-start-y" data-preset="grid-start-y" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Distance from the top left of the page to the top left of the first card</span>
@@ -103,9 +114,9 @@
                     <div class="pure-control-group">
                         <label for="marginX">Card margin:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="marginX" class="grid-value grid-definition width-medium" step="0.1" value="0" data-query="grid-margin-x" />
+                            <input type="number" id="marginX" class="grid-value grid-definition width-medium" step="0.1" value="0" data-query="grid-margin-x" data-preset="grid-margin-x" />
                             <span class="pure-form-addon">x</span>
-                            <input type="number" id="marginY" class="grid-value grid-definition width-medium" step="0.1" value="0" data-query="grid-margin-y" />
+                            <input type="number" id="marginY" class="grid-value grid-definition width-medium" step="0.1" value="0" data-query="grid-margin-y" data-preset="grid-margin-y" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Distance between individual cards in horizontal and vertical direction</span>
@@ -114,7 +125,7 @@
                     <div class="pure-control-group">
                         <label for="cutMargin">Cut margin:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="cutMargin" class="grid-value grid-definition width-medium" min="0" step="0.1" value="0" data-query="grid-cut-margin" />
+                            <input type="number" id="cutMargin" class="grid-value grid-definition width-medium" min="0" step="0.1" value="0" data-query="grid-cut-margin" data-preset="grid-cut-margin" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Distance from the edge of the card to the cut line</span>
@@ -122,7 +133,7 @@
 
                     <div class="pure-control-group">
                         <label for="stepSize">Step size:</label>
-                        <select class="min-width-medium" id="stepSize" data-query="grid-step-size">
+                        <select class="min-width-medium" id="stepSize" data-query="grid-step-size" data-preset="grid-step-size">
                             <option value="1">1mm</option>
                             <option value="0.5">0.5mm</option>
                             <option value="0.1" selected>0.1mm</option>
@@ -179,7 +190,7 @@
             <form id="form-step3" class="pure-form pure-form-aligned" onsubmit="return false">
                 <div class="pure-control-group">
                     <label for="backs">Backs:</label>
-                    <select id="backs" class="min-width-medium" data-query="cards-backs">
+                    <select id="backs" class="min-width-medium" data-query="cards-backs" data-preset="cards-backs">
                         <option value="lastpage" selected>Last page</option>
                         <option value="duplex">Duplex (right edge)</option>
                         <option value="duplex2">Duplex (bottom edge)</option>
@@ -197,7 +208,7 @@
                 </div>
 
                 <div class="pure-controls">
-                    <input type="checkbox" id="rotateBacks" data-query="cards-rotate-backs" /> <label for="rotateBacks">Rotate backs 180°</label>
+                    <input type="checkbox" id="rotateBacks" data-query="cards-rotate-backs" data-preset="cards-rotate-backs" /> <label for="rotateBacks">Rotate backs 180°</label>
                     <span class="pure-form-message-inline">Use this if the backs are otherwise upside down</span>
                 </div>
 
@@ -231,7 +242,7 @@
 
                     <div class="pure-control-group">
                         <label for="downloadFilename">File name:</label>
-                        <input type="text" id="downloadFilename" class="pure-input-1-2" data-query="output-filename" />
+                        <input type="text" id="downloadFilename" class="pure-input-1-2" />
                     </div>
                 </fieldset>
 

@@ -4,8 +4,9 @@
 
 ### ✨ Improvements
 
-- Pre-fill settings from query parameters, and sync setting changes to query parameters. This allows for sharing the current state of the app with others by just sharing the URL. Prepares things for #4.
+- Pre-fill settings from query parameters, and sync setting changes to query parameters. This allows for sharing the current state of the app with others by just sharing the URL.
 - Added some margin to the page on mobile.
+- Preset support! You can now save the current grid and card extraction settings as a preset and load them back later. This should make it easier to work with multiple different PDFs that have the same grid settings. Implements #4.
 
 ## 2024-05-21
 
