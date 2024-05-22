@@ -8,6 +8,10 @@
 - Added some margin to the page on mobile.
 - Preset support! You can now save the current grid and card extraction settings as a preset and load them back later. This should make it easier to work with multiple different PDFs that have the same grid settings. Implements #4.
 
+### 🐛 Bug fixes
+
+- Got rid of the quirks mode warning in the browser console.
+
 ## 2024-05-21
 
 ### ✨ Improvements
