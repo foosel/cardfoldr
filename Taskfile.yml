@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  serve:
+    dir: ./src
+    cmds:
+      - echo "Starting server on http://localhost:8000"
+      - python -m http.server 8000

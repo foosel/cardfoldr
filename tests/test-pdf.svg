@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="120mm"
+   height="120mm"
+   viewBox="0 0 120 120"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="test-pdf.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showguides="true"
+     inkscape:zoom="1.0137907"
+     inkscape:cx="688.01185"
+     inkscape:cy="226.87129"
+     inkscape:window-width="2560"
+     inkscape:window-height="1342"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g4-0">
+    <inkscape:page
+       x="0"
+       y="0"
+       width="120"
+       height="120"
+       id="page2"
+       margin="0"
+       bleed="0" />
+    <inkscape:page
+       x="130"
+       y="0"
+       width="120"
+       height="120"
+       id="page3"
+       margin="0"
+       bleed="0" />
+    <inkscape:page
+       x="260"
+       y="0"
+       width="120"
+       height="120"
+       id="page4"
+       margin="0"
+       bleed="0"
+       inkscape:export-filename="test-pdf.pdf"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(51.104987,56.195196)" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Page 3">
+    <g
+       id="g4-0"
+       transform="translate(181.10499,56.195193)"
+       inkscape:label="cards">
+      <rect
+         style="fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-7-0-6"
+         width="39.999996"
+         height="40"
+         x="158.89502"
+         y="23.804808"
+         inkscape:label="blue" />
+      <rect
+         style="fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-2-3-5"
+         width="39.999996"
+         height="40"
+         x="118.89501"
+         y="23.804808"
+         inkscape:label="green" />
+      <rect
+         style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-610-6"
+         width="39.999996"
+         height="40"
+         x="78.895012"
+         y="23.804808"
+         inkscape:label="red" />
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-612-9-6"
+         width="39.999996"
+         height="40"
+         x="158.89502"
+         y="-16.195192"
+         inkscape:label="white" />
+      <rect
+         style="fill:#888888;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-8-4-1"
+         width="39.999996"
+         height="40"
+         x="118.89501"
+         y="-16.195192"
+         inkscape:label="grey" />
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-5-7-5"
+         width="39.999996"
+         height="40"
+         x="78.895012"
+         y="-16.195192"
+         inkscape:label="black" />
+      <rect
+         style="fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-20-8-5"
+         width="40"
+         height="40"
+         x="158.895"
+         y="-56.195194"
+         inkscape:label="pink" />
+      <rect
+         style="fill:#00ffff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-61-4-4"
+         width="40"
+         height="40"
+         x="118.89501"
+         y="-56.195194"
+         inkscape:label="teal" />
+      <rect
+         style="fill:#ffff00;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-6-5-7"
+         width="40"
+         height="40"
+         x="78.895004"
+         y="-56.195194"
+         inkscape:label="yellow" />
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Page 2">
+    <g
+       id="g4"
+       transform="translate(51.104988,56.195195)"
+       inkscape:label="cards">
+      <rect
+         style="fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-20-8"
+         width="40"
+         height="40"
+         x="158.895"
+         y="23.804806"
+         inkscape:label="pink" />
+      <rect
+         style="fill:#00ffff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-61-4"
+         width="40"
+         height="40"
+         x="118.895"
+         y="23.804806"
+         inkscape:label="teal" />
+      <rect
+         style="fill:#ffff00;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-6-5"
+         width="40"
+         height="40"
+         x="78.895012"
+         y="23.804806"
+         inkscape:label="yellow" />
+      <rect
+         style="fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-7-0"
+         width="40"
+         height="40"
+         x="158.895"
+         y="-16.195194"
+         inkscape:label="blue" />
+      <rect
+         style="fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-2-3"
+         width="40"
+         height="40"
+         x="118.895"
+         y="-16.195194"
+         inkscape:label="green" />
+      <rect
+         style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-610"
+         width="40"
+         height="40"
+         x="78.895012"
+         y="-16.195194"
+         inkscape:label="red" />
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-612-9"
+         width="40"
+         height="40"
+         x="158.895"
+         y="-56.195194"
+         inkscape:label="white" />
+      <rect
+         style="fill:#888888;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-8-4"
+         width="40"
+         height="40"
+         x="118.895"
+         y="-56.195194"
+         inkscape:label="grey" />
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+         id="rect2-5-7"
+         width="40"
+         height="40"
+         x="78.895012"
+         y="-56.195194"
+         inkscape:label="black" />
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Page 1">
+    <g
+       id="g2"
+       transform="matrix(0.997921,0,0,1.0020877,50.998741,56.061992)"
+       inkscape:label="cards"
+       style="stroke-width:0.999997">
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-612"
+         width="40.083332"
+         height="39.916664"
+         x="29.061674"
+         y="23.888136"
+         inkscape:label="white" />
+      <rect
+         style="fill:#888888;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-8"
+         width="40.083332"
+         height="39.916664"
+         x="-11.021658"
+         y="23.888136"
+         inkscape:label="grey" />
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-5"
+         width="40.083332"
+         height="39.916664"
+         x="-51.104992"
+         y="23.888136"
+         inkscape:label="black" />
+      <rect
+         style="fill:#ff00ff;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-20"
+         width="40.083332"
+         height="39.916664"
+         x="29.061678"
+         y="-16.02853"
+         inkscape:label="pink" />
+      <rect
+         style="fill:#00ffff;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-61"
+         width="40.083332"
+         height="39.916664"
+         x="-11.021655"
+         y="-16.02853"
+         inkscape:label="teal" />
+      <rect
+         style="fill:#ffff00;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-6"
+         width="40.083332"
+         height="39.916664"
+         x="-51.104988"
+         y="-16.02853"
+         inkscape:label="yellow" />
+      <rect
+         style="fill:#0000ff;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-7"
+         width="40.083332"
+         height="39.916664"
+         x="29.061678"
+         y="-55.945194"
+         inkscape:label="blue" />
+      <rect
+         style="fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2-2"
+         width="40.083332"
+         height="39.916664"
+         x="-11.021654"
+         y="-55.945194"
+         inkscape:label="green" />
+      <rect
+         style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.499998;stroke-linejoin:round"
+         id="rect2"
+         width="40.083332"
+         height="39.916664"
+         x="-51.104988"
+         y="-55.945194"
+         inkscape:label="red" />
+    </g>
+  </g>
+</svg>
