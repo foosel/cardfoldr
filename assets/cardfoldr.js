@@ -819,6 +819,7 @@ document.getElementById("preset").addEventListener("change", async (event) => {
 
     document.getElementById("deletePreset").disabled = false;
     await loadPreset(key);
+    syncQueryParams();
 });
 
 document.getElementById("saveNewPreset").addEventListener("click", (event) => {
@@ -851,6 +852,10 @@ document.getElementById("deletePreset").addEventListener("click", (event) => {
 });
 
 // --- Event listeners ---
+
+const syncQueryParams = () => {
+    history.replaceState(null, "", "?" + generateQuery());
+}
 
 const onStepSizeChange = (event) => {
     const stepSize = document.getElementById("stepSize").value
@@ -1011,9 +1016,10 @@ window.onload = async () => {
     // sync query parameters
     document.querySelectorAll('[data-query]').forEach(element => {
         element.addEventListener('change', () => {
-            history.replaceState(null, "", "?" + generateQuery());
+            syncQueryParams();
         });
     });
+    
 
     // sync step size
     onStepSizeChange();
