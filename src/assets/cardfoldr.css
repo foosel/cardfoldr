@@ -15,6 +15,29 @@ main, footer {
     margin: 0 auto;
 }
 
+footer {
+    display: flex;
+    justify-content: space-between;
+    flex-direction:row;
+    margin: 1em auto;
+}
+
+footer span {
+    flex: 1;
+}
+
+footer span.left {
+    text-align: left;
+}
+
+footer span.center {
+    text-align: center;
+}
+
+footer span.right {
+    text-align: right;
+}
+
 @media only screen and (max-width: 480px) {
     main, footer {
         margin: 0 1em;
