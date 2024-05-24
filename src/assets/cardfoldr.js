@@ -11,14 +11,9 @@ const roundValue = (value, digits) => {
     return Math.round(value * factor) / factor;
 }
 
-const clearPages = () => {
-    const pagesContainer = document.getElementById('pages');
-    while (pagesContainer.firstChild) {
-        pagesContainer.removeChild(pagesContainer.firstChild);
-    }
-    const backgroundContainer = document.getElementById('pages-back');
-    while (backgroundContainer.firstChild) {
-        backgroundContainer.removeChild(backgroundContainer.firstChild);
+const clearPages = (container) => {
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
     }
 }
 
@@ -242,10 +237,8 @@ const refreshGrid = async () => {
     }
 };
 
-const refreshPdf = async () => {
-    if (!pdf) {
-        return;
-    }
+const refreshPdf = async (changed) => {
+    changed = changed || "pdf,background";
 
     const countX = parseInt(document.getElementById('countX').value);
     const countY = parseInt(document.getElementById('countY').value);
@@ -260,10 +253,8 @@ const refreshPdf = async () => {
     const scale = parseFloat(document.getElementById('scale').value) / 100;
     _currentScale = scale;
 
-    clearPages();
-
     const pagesContainer = document.getElementById('pages');
-    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf ? pdf.numPages : 0);
     const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
     const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
@@ -337,11 +328,21 @@ const refreshPdf = async () => {
         }
     }
 
-    renderPages(pdf, pagesContainer, "page", "Page ", pageSelection);
-    if (backgroundPdf) {
-        const backgroundPagesContainer = document.getElementById('pages-back');
-        renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection);
+
+    const jobs = [];
+
+    if (changed.includes("pdf") && pdf) {
+        clearPages(pagesContainer);
+        jobs.push(renderPages(pdf, pagesContainer, "page", "Page ", pageSelection));
     }
+
+    if (changed.includes("background") && backgroundPdf) {
+        const backgroundPagesContainer = document.getElementById('pages-back');
+        clearPages(backgroundPagesContainer);
+        jobs.push(renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection));
+    }
+
+    await Promise.all(jobs);
 }
 
 // --- Card extraction ---
@@ -895,7 +896,7 @@ const onPdfChange = async (event) => {
     pdfname = event.target.files[0].name;
     pdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
     document.getElementById("downloadFilename").value = pdfname.replace(/\.pdf$/i, ".foldable.pdf");
-    await refreshPdf();
+    await refreshPdf("pdf");
 }
 
 document.getElementById('file').addEventListener('change', async (event) => {
@@ -915,7 +916,7 @@ const onBackgroundPdfChange = async (event) => {
         return;
     }
     backgroundPdf = await pdfjsLib.getDocument(URL.createObjectURL(event.target.files[0])).promise;
-    await refreshPdf();
+    await refreshPdf("background");
 }
 
 document.getElementById('background').addEventListener('change', async (event) => {
@@ -925,7 +926,7 @@ document.getElementById('background').addEventListener('change', async (event) =
 document.getElementById('remove-background').addEventListener('click', async () => {
     document.getElementById('background').value = null;
     await onBackgroundPdfChange();
-    await refreshPdf();
+    await refreshPdf("background");
 });
 
 document.getElementById('refresh').addEventListener('click', async () => {
