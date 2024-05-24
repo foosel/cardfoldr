@@ -6,10 +6,13 @@
 
 - Added build information and an issue tracker link to the footer.
 - Refactored the source tree in preparation for test coverage and CI/CD setup.
+- Added a test suite and set up a CI/CD pipeline with GitHub Actions.
 
 ### 🐛 Bug fixes
 
 - Fixed card extraction for "separate file (all pages)" mode. It was only extracting the first card of each page instead of going through all of them.
+- Fixed card extraction for "duplex (bottom edge)" mode. It was extracting from the wrong location.
+- Fixed a race condition causing pages to be duplicated in the grid visualization.
 
 ## 2024-05-22
 
