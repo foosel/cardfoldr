@@ -547,13 +547,12 @@ const extractCards = async () => {
                         canvas.width = width / mmFactor;
 
                         const ctx = canvas.getContext('2d');
-                        ctx.rotate(Math.PI);
-                        ctx.translate((startX + x * width + x * marginX) / mmFactor, (startY + y * height + y * marginY) / mmFactor);
+                        ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
 
                         await backPage.render({ canvasContext: ctx, viewport }).promise;
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-                        cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
+                        cardImage.src = rotateBacks ? canvas.toDataURL(mimeType) : await rotateImage180(canvas.toDataURL(mimeType));
                         
                         backCount++;
                     }
