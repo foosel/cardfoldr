@@ -1049,4 +1049,16 @@ window.onload = async () => {
 
     // load presets
     refreshPresetList();
+
+    // load and fill in version
+    try {
+        const versionInfo = await fetch("./version.json");
+        const versionData = await versionInfo.json();
+        const version = versionData.commit && versionData.build && versionData.date ? `Build #${versionData.build} of commit ${versionData.commit}` : "Local build";
+
+        const versionElement = document.getElementById("version");
+        versionElement.innerHTML = ` &middot; ${version}`;
+    } catch (e) {
+        console.error("Error loading version information", e);
+    }
 };
