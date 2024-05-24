@@ -1,6 +1,8 @@
 const { pdfjsLib } = globalThis;
 pdfjsLib.GlobalWorkerOptions.workerSrc = './assets/pdf-js/pdf.worker.mjs';
 
+const pdfGenerationWorker = new Worker('./assets/worker.js');
+
 let pdf = null;
 let backgroundPdf = null;
 let pdfname = null;
@@ -617,8 +619,7 @@ const generatePdf = async () => {
             cards.push({ front: frontImage, back: backImage });
         }
 
-        const worker = new Worker('./assets/worker.js');
-        worker.onmessage = async (e) => {
+        pdfGenerationWorker.onmessage = async (e) => {
             if (e.data.state) {
                 const { state, data } = e.data;
 
@@ -666,16 +667,20 @@ const generatePdf = async () => {
                 document.getElementById('output').appendChild(iframe);
                 
                 resolve();
+            } else if (e.data.error) {
+                alert(e.data.error);
+                generateLog.textContent = `Error generating PDF! Error: ${e.data.error}`;
+                reject(e.data.error);
             }
         }
-        worker.onerror = (e) => {
+        pdfGenerationWorker.onerror = (e) => {
             console.error(e.message, e.filename, e.lineno, e.colno, e.error);
-            generateLog.textContent = "Error generating PDF!";
+            generateLog.textContent = `Error generating PDF! Error: ${e.message}`;
             reject(e);
         }
 
         const title = `CardFoldr version of ${pdfname}`;
-        worker.postMessage({
+        pdfGenerationWorker.postMessage({
             generatePdf: {
                 cards: cards,
                 options: {
@@ -999,8 +1004,11 @@ document.getElementById('generate').addEventListener('click', async () => {
     clearOutput();
 
     window.setTimeout(async () => {
-        await generatePdf();
-        document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";
+        try {
+            await generatePdf();
+        } finally {
+            document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-flag-checkered";
+        }
     }, 100);
 });
 

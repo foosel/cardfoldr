@@ -226,7 +226,7 @@ if (typeof importScripts === "function") {
                 rotate = true;
             } else {
                 // card does not fit on half of the page in either orientation
-                alert("Cards are too large to fit on half of the page in either orientation");
+                postMessage({ error: "Cards are too large to fit on half of the page in either orientation" });
                 return;
             }
     
@@ -257,7 +257,7 @@ if (typeof importScripts === "function") {
                 rotate = true;
             } else {
                 // card does not fit on half of the page in either orientation
-                alert("Cards are too large to fit on half of the page in either orientation");
+                postMessage({ error: "Cards are too large to fit on half of the page in either orientation" });
                 return;
             }
     
