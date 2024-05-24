@@ -492,22 +492,26 @@ const extractCards = async () => {
         let backCount = 1;
         for (let p = 0; p < backgroundPageSelection.length; p++) {
             const backPage = await backgroundPdf.getPage(backgroundPageSelection[p]);
-            const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
-            const viewport = backPage.getViewport({ scale: scale });
+            for (let y = 0; y < countY; y++) {
+                for (let x = 0; x < countX; x++) {
+                    const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
+                    const viewport = backPage.getViewport({ scale: scale });
 
-            const canvas = document.createElement('canvas');
-            canvas.height = height / mmFactor;
-            canvas.width = width / mmFactor;
+                    const canvas = document.createElement('canvas');
+                    canvas.height = height / mmFactor;
+                    canvas.width = width / mmFactor;
 
-            const ctx = canvas.getContext('2d');
-            ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
-    
-            await backPage.render({ canvasContext: ctx, viewport }).promise;
+                    const ctx = canvas.getContext('2d');
+                    ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
+            
+                    await backPage.render({ canvasContext: ctx, viewport }).promise;
 
-            const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
-            cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
+                    const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
+                    cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
 
-            backCount++;
+                    backCount++;
+                }
+            }
         }
     } else if (backLoc === "duplex" || backLoc === "duplex2") {
         let backCount = 1;
