@@ -333,15 +333,19 @@ const refreshPdf = async (changed) => {
 
     const jobs = [];
 
-    if (changed.includes("pdf") && pdf) {
+    if (changed.includes("pdf")) {
         clearPages(pagesContainer);
-        jobs.push(renderPages(pdf, pagesContainer, "page", "Page ", pageSelection));
+        if (pdf) {
+            jobs.push(renderPages(pdf, pagesContainer, "page", "Page ", pageSelection));
+        }
     }
 
-    if (changed.includes("background") && backgroundPdf) {
+    if (changed.includes("background")) {
         const backgroundPagesContainer = document.getElementById('pages-back');
         clearPages(backgroundPagesContainer);
-        jobs.push(renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection));
+        if (backgroundPdf) {
+            jobs.push(renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection));
+        }
     }
 
     await Promise.all(jobs);
