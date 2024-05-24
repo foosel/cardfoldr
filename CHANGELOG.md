@@ -1,5 +1,16 @@
 # Changelog
 
+## 2024-05-24
+
+### ✨ Improvements
+
+- Added build information and an issue tracker link to the footer.
+- Refactored the source tree in preparation for test coverage and CI/CD setup.
+
+### 🐛 Bug fixes
+
+- Fixed card extraction for "separate file (all pages)" mode. It was only extracting the first card of each page instead of going through all of them.
+
 ## 2024-05-22
 
 ### ✨ Improvements
