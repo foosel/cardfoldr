@@ -1055,8 +1055,11 @@ window.onload = async () => {
         const versionInfo = await fetch("./version.json");
         const versionData = await versionInfo.json();
 
-        const versionElement = document.getElementById("version");
-        versionElement.innerHTML = versionData.commit && versionData.build && versionData.date ? `Build #${versionData.build} of commit ${versionData.commit}` : "Local build";
+        const versionElement = document.createElement("span");
+        versionElement.innerHTML = versionData.commit && versionData.build && versionData.date ? `Build #${versionData.build} of commit ${versionData.commit.substring(0, 8)}` : "Local build";
+
+        const footerElement = document.getElementsByTagName("footer")[0];
+        footerElement.appendChild(versionElement);
     } catch (e) {
         console.error("Error loading version information", e);
     }

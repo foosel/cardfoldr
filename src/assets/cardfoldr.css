@@ -24,17 +24,14 @@ footer {
 
 footer span {
     flex: 1;
-}
-
-footer span.left {
-    text-align: left;
-}
-
-footer span.center {
     text-align: center;
 }
 
-footer span.right {
+footer span:first-child {
+    text-align: left;
+}
+
+footer span:last-child {
     text-align: right;
 }
 
