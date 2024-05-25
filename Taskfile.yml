@@ -5,3 +5,23 @@ tasks:
     cmds:
       - echo "Starting server on http://localhost:8000"
       - npx http-server ./src -p 8000
+
+  test:
+    dir: tests
+    cmds:
+      - npm run test
+  
+  test-ui:
+    dir: tests
+    cmds:
+      - npm run test-ui
+  
+  test-report:
+    dir: tests
+    cmds:
+      - npm run test-report
+    
+  update-screenshots:
+    dir: tests
+    cmds:
+      - npm run update-screenshots

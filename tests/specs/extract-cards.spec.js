@@ -1,9 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-const gotoPage = async (page) => {
-    await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=");
-}
+test.describe.configure({ mode: 'parallel' });
 
 const loadTestPdf = async (page) => {
     await page.locator("#file").setInputFiles("./files/test-pdf.pdf");
@@ -34,58 +32,58 @@ const checkCards = async (page, count) => {
     }
 }
 
-test("Card extraction: last page", async ({page}) => {
-    await gotoPage(page);
-    await loadTestPdf(page);
+test.describe("Card extraction: single file", () => {
+    test.beforeEach(async ({page}) => {
+        await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=");
+        await loadTestPdf(page);
+    });
 
-    await page.locator("[data-query='cards-backs']").selectOption("lastpage");
-    await page.locator("#extractCards").click();
+    test("last page", async ({page}) => {
+        await page.locator("[data-query='cards-backs']").selectOption("lastpage");
+        await page.locator("#extractCards").click();
+    
+        await checkCards(page, 18);
+    });
+    
+    test("duplex right", async ({page}) => {
+        await page.locator("#pages > .page:nth-child(3) .page-info").first().click();
+        await expect(page.locator("#pages > .page:nth-child(3)")).toHaveClass(/excluded/);
 
-    await checkCards(page, 18);
+        await page.locator("[data-query='cards-backs']").selectOption("duplex");
+        await page.locator("#extractCards").click();
+    
+        await checkCards(page, 9);
+    });
+    
+    test("duplex down", async ({page}) => {
+        await page.locator("#pages > .page:nth-child(3) .page-info").first().click();
+        await expect(page.locator("#pages > .page:nth-child(3)")).toHaveClass(/excluded/);
+
+        await page.locator("[data-query='cards-backs']").selectOption("duplex2");
+        await page.locator("#extractCards").click();
+    
+        await checkCards(page, 9);
+    });
 });
 
-test("Card extraction: duplex right", async ({page}) => {
-    await gotoPage(page);
-    await loadTestPdf(page);
+test.describe("Card extraction: front and back file", () => {
+    test.beforeEach(async ({page}) => {
+        await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=");
+        await loadTestPdf(page);
+        await loadTestPdfAsBack(page);
+    });
 
-    await page.locator("#pages > .page:nth-child(3) .page-info").first().click();
-    await expect(page.locator("#pages > .page:nth-child(3)")).toHaveClass(/excluded/);
-    await page.locator("[data-query='cards-backs']").selectOption("duplex");
-    await page.locator("#extractCards").click();
+    test("first page", async ({page}) => {
+        await page.locator("[data-query='cards-backs']").selectOption("file");
+        await page.locator("#extractCards").click();
 
-    await checkCards(page, 9);
-});
+        await checkCards(page, 27);
+    });
 
-test("Card extraction: duplex down", async ({page}) => {
-    await gotoPage(page);
-    await loadTestPdf(page);
+    test("all pages", async ({page}) => {
+        await page.locator("[data-query='cards-backs']").selectOption("fileall");
+        await page.locator("#extractCards").click();
 
-    await page.locator("#pages > .page:nth-child(3) .page-info").first().click();
-    await expect(page.locator("#pages > .page:nth-child(3)")).toHaveClass(/excluded/);
-    await page.locator("[data-query='cards-backs']").selectOption("duplex2");
-    await page.locator("#extractCards").click();
-
-    await checkCards(page, 9);
-});
-
-test("Card extraction: file single", async ({page}) => {
-    await gotoPage(page);
-    await loadTestPdf(page);
-    await loadTestPdfAsBack(page);
-
-    await page.locator("[data-query='cards-backs']").selectOption("file");
-    await page.locator("#extractCards").click();
-
-    await checkCards(page, 27);
-});
-
-test("Card extraction: file all", async ({page}) => {
-    await gotoPage(page);
-    await loadTestPdf(page);
-    await loadTestPdfAsBack(page);
-
-    await page.locator("[data-query='cards-backs']").selectOption("fileall");
-    await page.locator("#extractCards").click();
-
-    await checkCards(page, 27);
+        await checkCards(page, 27);
+    });
 });
