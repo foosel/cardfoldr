@@ -27,3 +27,4 @@ CardFoldr uses the following fine projects:
 - [PDF-Lib](https://pdf-lib.js.org/)
 - [pure.css](https://purecss.io/)
 - [Font Awesome](https://fontawesome.com/)
+- [Playwright](https://playwright.dev/)
