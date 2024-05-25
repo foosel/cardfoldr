@@ -768,6 +768,7 @@ const updatePreset = (key) => {
 
 const deletePreset = (key) => {
     localStorage.removeItem(toStorageKey(key));
+    document.getElementById("deletePreset").disabled = true;
 }
 
 const _getPreset = (key) => {
@@ -819,13 +820,16 @@ const refreshPresetList = (key) => {
 
 document.querySelectorAll('[data-preset]').forEach(element => {
     element.addEventListener('change', () => {
-        document.getElementById("updatePreset").disabled = false;
+        if (document.getElementById("preset").value !== "") {
+            document.getElementById("updatePreset").disabled = false;
+        };
     });
 });
 
 document.getElementById("preset").addEventListener("change", async (event) => {
     const key = event.target.value;
     if (key === "") {
+        document.getElementById("updatePreset").disabled = true;
         document.getElementById("deletePreset").disabled = true;
         return;
     }
