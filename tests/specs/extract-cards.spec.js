@@ -1,17 +1,7 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../fixtures');
 
 test.describe.configure({ mode: 'parallel' });
-
-const loadTestPdf = async (page) => {
-    await page.locator("#file").setInputFiles("./files/test-pdf.pdf");
-    await expect(page.locator("#pages > .page")).toHaveCount(3);
-}
-
-const loadTestPdfAsBack = async (page) => {
-    await page.locator("#background").setInputFiles("./files/test-pdf.pdf");
-    await expect(page.locator("#pages-back > .page")).toHaveCount(3);
-}
 
 const checkCards = async (page, count) => {
     await expect(page.locator("#cards > .card")).toHaveCount(count);
@@ -33,9 +23,10 @@ const checkCards = async (page, count) => {
 }
 
 test.describe("Card extraction: single file", () => {
-    test.beforeEach(async ({page}) => {
-        await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=");
-        await loadTestPdf(page);
+    test.beforeEach(async ({page, testPdf}) => {
+        await page.goto(`./?${testPdf.query}`);
+        await page.locator("#file").setInputFiles(testPdf.path);
+        await expect(page.locator("#pages > .page")).toHaveCount(3);
     });
 
     test("last page", async ({page}) => {
@@ -67,10 +58,14 @@ test.describe("Card extraction: single file", () => {
 });
 
 test.describe("Card extraction: front and back file", () => {
-    test.beforeEach(async ({page}) => {
-        await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=");
-        await loadTestPdf(page);
-        await loadTestPdfAsBack(page);
+    test.beforeEach(async ({page, testPdf}) => {
+        await page.goto(`./?${testPdf.query}`);
+
+        await page.locator("#file").setInputFiles(testPdf.path);
+        await expect(page.locator("#pages > .page")).toHaveCount(3);
+
+        await page.locator("#background").setInputFiles(testPdf.path);
+        await expect(page.locator("#pages-back > .page")).toHaveCount(3);
     });
 
     test("first page", async ({page}) => {

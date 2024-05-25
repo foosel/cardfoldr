@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../fixtures');
 
 test("Fill inputs from query", async ({page}) => {
     await page.goto("./?grid-count-x=3&grid-count-y=3&grid-width=40&grid-height=40&grid-start-x=0&grid-start-y=0&grid-margin-x=0&grid-margin-y=0&grid-cut-margin=0&grid-step-size=0.1&grid-source-pages=&grid-back-pages=&cards-backs=fileall&cards-optimize=filesize&cards-rotate-backs=false&output-page-size=A4&output-foldline=vertical&output-edge=bottom&output-printer-margin=5&output-card-margin=2&output-folding-margin=2&output-cutter-offset=0");
