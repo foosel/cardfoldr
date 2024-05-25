@@ -79,7 +79,17 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           npx playwright install-deps
-    
+
+      - name: 🏗 Install extra PDF compare dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install graphicsmagick
+          sudo apt-get install imagemagick
+          sudo apt-get install ghostscript
+
+          # Change ImageMagick policy to allow pdf -> png conversion
+          sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+
       - name: 🎭 Run Playwright
         working-directory: ./tests
         run: |
