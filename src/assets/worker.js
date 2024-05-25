@@ -200,7 +200,7 @@ if (typeof importScripts === "function") {
         const cardMarginDoc = cardMargin * mmFactor;
         const foldingMarginDoc = foldingMargin * mmFactor;
     
-        const usableHalf = foldLine === "vertical" ? (usableWidth / 2 - 2 * foldingMarginDoc) : (usableHeight / 2 - 2 * foldingMarginDoc);
+        const usableHalf = foldLine === "vertical" ? (usableWidth / 2 - foldingMarginDoc) : (usableHeight / 2 - foldingMarginDoc);
 
         let maxCardsPerPage, rotate, totalHeight, totalWidth;
         if (foldLine === "vertical") {
@@ -242,19 +242,19 @@ if (typeof importScripts === "function") {
     
                 if (cardsPerPageWidth > cardsPerPageHeight) {
                     maxCardsPerPage = cardsPerPageWidth;
-                    rotate = false;
+                    rotate = true; // heads-up, inverted logic!
                 } else {
                     maxCardsPerPage = cardsPerPageHeight;
-                    rotate = true;
+                    rotate = false; // heads-up, inverted logic!
                 }
             } else if (cardWidth < usableHalf) {
                 // card fits on half of the page in width, but not height
                 maxCardsPerPage = Math.floor(usableWidth / cardWidthDoc);
-                rotate = false;
+                rotate = true; // heads-up, inverted logic!
             } else if (cardHeight < usableHalf) {
                 // card fits on half of the page in height, but not width
                 maxCardsPerPage = Math.floor(usableWidth / cardHeightDoc);
-                rotate = true;
+                rotate = false; // heads-up, inverted logic!
             } else {
                 // card does not fit on half of the page in either orientation
                 postMessage({ error: "Cards are too large to fit on half of the page in either orientation" });
@@ -326,7 +326,7 @@ if (typeof importScripts === "function") {
                     yBack = yFront;
                 }
             } else {
-                if (!rotate) {
+                if (!rotate) { // heads-up, inverted logic!
                     angleFront = PDFLib.degrees(0);
                     yFront = pageHeight / 2 + foldingMarginDoc;
                     xFront = (pageWidth - totalWidth) / 2 + (count % maxCardsPerPage) * (cardWidthDoc + cardMarginDoc);
