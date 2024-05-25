@@ -868,6 +868,14 @@ document.getElementById("deletePreset").addEventListener("click", (event) => {
     }
 });
 
+document.getElementById("shareLink").addEventListener("click", (event) => {
+    const query = generateQuery();
+    const url = `https://foosel.github.io/cardfoldr/?${query}`;
+    navigator.clipboard.writeText(url).then(() => {
+        alert(`Link copied to clipboard!`);
+    });
+});
+
 // --- Event listeners ---
 
 const syncQueryParams = () => {
