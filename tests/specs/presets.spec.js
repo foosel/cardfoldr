@@ -48,7 +48,6 @@ test.beforeEach(async ({page, testPdf}) => {
     await page.goto("./");
     const storage = await pageStorage(page);
     await storage.setItem("preset-test-pdf", JSON.stringify(testPdf.preset));
-    console.log("Local Storage:", await storage.getAll());
     await page.reload();
 });
 
@@ -68,7 +67,6 @@ test("Add preset", async ({page}) => {
     await page.locator("#saveNewPreset").click();
 
     const storage = await pageStorage(page);
-    console.log("Local Storage:", await storage.getAll());
     await expect(storage.hasItem("preset-shiny-new-preset")).toBeTruthy();
 
     await expect(page.locator("#preset option")).toHaveCount(3);
@@ -88,7 +86,6 @@ test("Update preset", async ({page, testPdf}) => {
     await page.locator("#updatePreset").click();
 
     const storage = await pageStorage(page);
-    console.log("Local Storage:", await storage.getAll());
     await expect(storage.hasItem("preset-test-pdf")).toBeTruthy();
 
     const updatedPreset = JSON.parse(await storage.getItem("preset-test-pdf"));

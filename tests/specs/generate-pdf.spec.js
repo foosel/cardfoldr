@@ -50,7 +50,6 @@ test("Simple PDF generation", async ({page, testPdf}, testInfo) => {
         } catch (error) {
             result = error;
         }
-        console.log("Result:", result);
         expect(result.message).toBeUndefined();
         expect(result.status).toBe("passed")    
     }
