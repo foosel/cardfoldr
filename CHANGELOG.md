@@ -1,5 +1,16 @@
 # Changelog
 
+## 2024-05-26
+
+### ✨ Improvements
+
+- Added a share button to the presets area that will copy the current settings as shareable URL to the clipboard.
+- Turned selected cards into a setting, like the page selection. That way they can also be shared.
+
+### 🐛 Bug fixes
+
+- Fixed an error in the pdf generation logic in case of a horizontal foldline.
+
 ## 2024-05-24
 
 ### ✨ Improvements

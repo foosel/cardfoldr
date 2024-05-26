@@ -13,40 +13,40 @@ const roundValue = (value, digits) => {
     return Math.round(value * factor) / factor;
 }
 
-const clearPages = (container) => {
+const clearContainer = (container) => {
     while (container.firstChild) {
         container.removeChild(container.firstChild);
     }
 }
 
-const parsePageSelection = (pageSelection, pageCount) => {
-    if (!pageSelection) {
-        return Array.from({ length: pageCount }, (_, i) => i + 1);
+const parseRangeSelection = (rangeSelection, count) => {
+    if (!rangeSelection) {
+        return Array.from({ length: count }, (_, i) => i + 1);
     }
 
-    let pages = [];
-    for (const page of pageSelection.split(',')) {
-        const p = page.trim();
+    let range = [];
+    for (const item of rangeSelection.split(',')) {
+        const p = item.trim();
         if (p.includes("-")) {
             const parts = p.split('-').map(x => x.trim());
 
             let first = parts[0] === "" ? 1 : parseInt(parts[0]);
-            let last = parts[1] === "" ? pageCount : parseInt(parts[1]);
+            let last = parts[1] === "" ? count : parseInt(parts[1]);
             if (first > last) {
                 const tmp = first;
                 first = last;
                 last = tmp;
             }
-            pages = pages.concat(Array.from({ length: last - first + 1 }, (_, i) => i + first));
+            range = range.concat(Array.from({ length: last - first + 1 }, (_, i) => i + first));
         } else {
-            pages.push(parseInt(p));
+            range.push(parseInt(p));
         }
     }
 
-    return pages.filter(x => x >= 1 && x <= pageCount);
+    return range.filter(x => x >= 1 && x <= count);
 }
 
-const toPageSelection = (selected, pageCount) => {
+const toRangeSelection = (selected, pageCount) => {
     let last = null, rangeStart = null;
     const output = [];
     for (const page of selected) {
@@ -94,6 +94,19 @@ const toPageSelection = (selected, pageCount) => {
     return output.join(", ");
 }
 
+const refreshRangeSelection = async (selection, container, entryLocator) => {
+    const range = parseRangeSelection(selection, container.querySelectorAll(entryLocator).length);
+    for (const entry of container.querySelectorAll(entryLocator)) {
+        const p = parseInt(entry.id.split('-')[1]);
+        if (range.includes(p)) {
+            entry.classList.remove("excluded");
+        } else {
+            entry.classList.add("excluded");
+        }
+    }
+
+}
+
 // --- PDF rendering ---
 
 let _currentScale;
@@ -102,12 +115,13 @@ const updatePageSelection = (which) => {
     if (which === "pdf" && pdf) {
         const pagesContainer = document.getElementById('pages');
         const selectedPages = Array.from(pagesContainer.querySelectorAll('.page:not(.excluded)')).map(x => parseInt(x.id.split('-')[1]));
-        document.getElementById('pageSelection').value = toPageSelection(selectedPages, pdf.numPages);
+        document.getElementById('pageSelection').value = toRangeSelection(selectedPages, pdf.numPages);
     } else if (which === "background" && backgroundPdf) {
         const backgroundContainer = document.getElementById('pages-back');
         const selectedBackgroundPages = Array.from(backgroundContainer.querySelectorAll('.page:not(.excluded)')).map(x => parseInt(x.id.split('-')[2]));
-        document.getElementById('backgroundPageSelection').value = toPageSelection(selectedBackgroundPages, backgroundPdf ? backgroundPdf.numPages : 0);
+        document.getElementById('backgroundPageSelection').value = toRangeSelection(selectedBackgroundPages, backgroundPdf ? backgroundPdf.numPages : 0);
     }
+    syncQueryParams();
 }
 
 const drawGrid = (ctx, countX, countY, width, height, startX, startY, marginX, marginY, cutMargin, mmFactor) => {
@@ -180,33 +194,8 @@ const drawPage = async (page, scale) => {
 }
 
 const refreshPageSelection = async () => {
-    if (!pdf) {
-        return;
-    }
-
-    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
-    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
-
-    const pagesContainer = document.getElementById('pages');
-    const backgroundContainer = document.getElementById('pages-back');
-
-    for (const page of pagesContainer.querySelectorAll('.page')) {
-        const p = parseInt(page.id.split('-')[1]);
-        if (pageSelection.includes(p)) {
-            page.classList.remove("excluded");
-        } else {
-            page.classList.add("excluded");
-        }
-    }
-
-    for (const page of backgroundContainer.querySelectorAll('.page')) {
-        const p = parseInt(page.id.split('-')[2]);
-        if (backgroundPageSelection.includes(p)) {
-            page.classList.remove("excluded");
-        } else {
-            page.classList.add("excluded");
-        }
-    }
+    refreshRangeSelection(document.getElementById('pageSelection').value, document.getElementById('pages'), '.page');
+    refreshRangeSelection(document.getElementById('backgroundPageSelection').value, document.getElementById('pages-back'), '.page');
 }
 
 const refreshGrid = async () => {
@@ -256,8 +245,8 @@ const refreshPdf = async (changed) => {
     _currentScale = scale;
 
     const pagesContainer = document.getElementById('pages');
-    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf ? pdf.numPages : 0);
-    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
+    const pageSelection = parseRangeSelection(document.getElementById('pageSelection').value, pdf ? pdf.numPages : 0);
+    const backgroundPageSelection = parseRangeSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
     const coordinateHelp = "Mouse over the pages to see the coordinates of the cursor here";
     document.getElementById('coordinates').textContent = coordinateHelp;
@@ -334,7 +323,7 @@ const refreshPdf = async (changed) => {
     const jobs = [];
 
     if (changed.includes("pdf")) {
-        clearPages(pagesContainer);
+        clearContainer(pagesContainer);
         if (pdf) {
             jobs.push(renderPages(pdf, pagesContainer, "page", "Page ", pageSelection));
         }
@@ -342,7 +331,7 @@ const refreshPdf = async (changed) => {
 
     if (changed.includes("background")) {
         const backgroundPagesContainer = document.getElementById('pages-back');
-        clearPages(backgroundPagesContainer);
+        clearContainer(backgroundPagesContainer);
         if (backgroundPdf) {
             jobs.push(renderPages(backgroundPdf, backgroundPagesContainer, "background-page", "Backs page ", backgroundPageSelection));
         }
@@ -366,6 +355,14 @@ const updateDeckInfo = (count, excluded) => {
     document.getElementById('card-output').textContent = `Extracted ${count} cards, ${excluded} of which are excluded, making for a total of ${count - excluded} cards to be included.`;
 }
 
+const updateCardSelection = () => {
+    const cardsContainer = document.getElementById('cards');
+    const cardCount = cardsContainer.querySelectorAll('.card').length;
+    const selectedCards = Array.from(cardsContainer.querySelectorAll('.card:not(.excluded)')).map(x => parseInt(x.id.split('-')[1]));
+    document.getElementById('cardSelection').value = toRangeSelection(selectedCards, cardCount);
+    syncQueryParams();
+}
+
 const rotateImage180 = async (image) => {
     const img = new Image();
     img.src = image;
@@ -387,8 +384,8 @@ const rotateImage180 = async (image) => {
 
 const extractCards = async () => {
     if (!pdf) return;
-    const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
-    const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
+    const pageSelection = parseRangeSelection(document.getElementById('pageSelection').value, pdf.numPages);
+    const backgroundPageSelection = parseRangeSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf ? backgroundPdf.numPages : 0);
 
     const countX = parseInt(document.getElementById('countX').value);
     const countY = parseInt(document.getElementById('countY').value);
@@ -419,6 +416,7 @@ const extractCards = async () => {
     } else if (backLoc === "duplex" || backLoc === "duplex2") {
         expectedTotal = countX * countY * Math.ceil(pageSelection.length / 2);
     }
+    const cardSelection = parseRangeSelection(document.getElementById('cardSelection').value, expectedTotal);
 
     let count = 1;
     for (let p = 0; p < (backLoc === "lastpage" ? pageSelection.length - 1 : pageSelection.length); p = p + ((backLoc === "duplex" || backLoc === "duplex2") ? 2 : 1)) {
@@ -452,9 +450,10 @@ const extractCards = async () => {
 
                 const cardElement = document.createElement('div');
                 cardElement.id = `card-${count}`;
-                cardElement.classList = `card ${orientationClass}`;
+                cardElement.classList = `card ${orientationClass}` + (cardSelection === null || cardSelection.includes(count) ? "" : " excluded");
                 cardElement.addEventListener("click", () => {
                     cardElement.classList.toggle("excluded");
+                    updateCardSelection();
                     updateDeckInfo(count - 1, document.querySelectorAll('.card.excluded').length);
                 });
 
@@ -976,8 +975,8 @@ document.getElementById('extractCards').addEventListener('click', async () => {
         return;
     }
     if (backLoc === "fileall") {
-        const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
-        const backgroundPageSelection = parsePageSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf.numPages);
+        const pageSelection = parseRangeSelection(document.getElementById('pageSelection').value, pdf.numPages);
+        const backgroundPageSelection = parseRangeSelection(document.getElementById('backgroundPageSelection').value, backgroundPdf.numPages);
     
         if (pageSelection.length !== backgroundPageSelection.length) {
             alert("The number of (selected) pages in the card file and the card background file must match");
@@ -985,7 +984,7 @@ document.getElementById('extractCards').addEventListener('click', async () => {
         }
     }
     if ((backLoc === "duplex" || backLoc === "duplex2")) {
-        const pageSelection = parsePageSelection(document.getElementById('pageSelection').value, pdf.numPages);
+        const pageSelection = parseRangeSelection(document.getElementById('pageSelection').value, pdf.numPages);
         
         if (pageSelection.length % 2 !== 0) {
             alert("The number of pages in the card file must be even to use duplex mode for card backs");
