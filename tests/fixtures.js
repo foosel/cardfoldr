@@ -5,7 +5,10 @@ const testPdf = {
     preset: {"grid-count-x":"3","grid-count-y":"3","grid-width":"40","grid-height":"40","grid-start-x":"0","grid-start-y":"0","grid-margin-x":"0","grid-margin-y":"0","grid-cut-margin":"0","grid-step-size":"0.1","cards-backs":"fileall","cards-rotate-backs":false,"_key":"test-pdf","_name":"Test PDF"},
     path: "./files/test-pdf.pdf",
     filename: "test-pdf.pdf",
-    outputPath : "./files/test-pdf.foldable.pdf",
+    outputPathDefault: "./files/test-pdf.foldable.pdf",
+    outputPathVerticalOnly: "./files/test-pdf.foldable.vertical.pdf",
+    outputPathHorizontalOnly: "./files/test-pdf.foldable.horizontal.pdf",
+    outputPathNoRows: "./files/test-pdf.foldable.no-rows.pdf",
     outputFilename: "test-pdf.foldable.pdf"
 }
 

@@ -215,7 +215,8 @@
                     <span class="pure-form-message-inline">Comma separated list of cards or ranges of all included cards</span>
                 </div>
 
-                <div class="pure-controls">
+                <div class="pure-control-group">
+                    <span class="spacer"></span>
                     <input type="checkbox" id="rotateBacks" data-query="cards-rotate-backs" data-preset="cards-rotate-backs" /> <label for="rotateBacks">Rotate backs 180°</label>
                     <span class="pure-form-message-inline">Use this if the backs are otherwise upside down</span>
                 </div>
@@ -260,10 +261,11 @@
                     <div class="pure-control-group">
                         <label for="foldLine">Fold line:</label>
                         <select id="foldLine" class="min-width-medium" data-query="output-foldline">
-                            <option value="vertical" selected>Vertical</option>
+                            <option value="auto" selected>Auto</option>
+                            <option value="vertical">Vertical</option>
                             <option value="horizontal">Horizontal</option>
                         </select>
-                        <span class="pure-form-message-inline">Direction of the fold line</span>
+                        <span class="pure-form-message-inline">Direction of the fold line, "Auto" will optimize for cards per page</span>
                     </div>
 
                     <div class="pure-control-group">
@@ -299,6 +301,12 @@
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Distance from the fold line to the edge of the card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <span class="spacer"></span>
+                        <input type="checkbox" id="allowMultipleRows" data-query="output-multiple-rows" checked /> <label for="allowMultipleRows">Allow multiple rows</label>
+                        <span class="pure-form-message-inline">Allowing multiple rows will possibly allow more cards per page</span>
                     </div>
                 </fieldset>
 

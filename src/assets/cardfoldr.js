@@ -607,10 +607,11 @@ const generatePdf = async () => {
         const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
         const printerMargin = parseFloat(document.getElementById('printerMargin').value);
         const cutterOffset = parseFloat(document.getElementById('cutterOffset').value);
-        const foldLine = document.getElementById('foldLine').value;
+        const foldLinePreference = document.getElementById('foldLine').value;
 
         const foldLineEdge = document.getElementById('foldLineEdge').value;
         const downloadFilename = document.getElementById('downloadFilename').value;
+        const allowMultipleRows = document.getElementById('allowMultipleRows').checked;
 
         const generateLog = document.getElementById('generate-output');
         generateLog.textContent = "Collecting cards...";
@@ -701,7 +702,8 @@ const generatePdf = async () => {
                     cutterOffset,
 
                     pageSize,
-                    foldLine,
+                    foldLinePreference,
+                    allowMultipleRows,
                     title,
                 }
             }

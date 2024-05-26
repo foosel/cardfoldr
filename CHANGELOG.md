@@ -6,6 +6,7 @@
 
 - Added a share button to the presets area that will copy the current settings as shareable URL to the clipboard.
 - Turned selected cards into a setting, like the page selection. That way they can also be shared.
+- The PDF generation will now - unless configured otherwise - try to make the best of the available space and generate multiple rows of cards. It will also detect whether a horizontal or vertical fold line is best to get as many as possible cards on one page. This should make the generated PDFs more efficient in terms of paper usage, especially in case of tiny cards - or tiles.
 
 ### 🐛 Bug fixes
 
