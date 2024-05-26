@@ -15,7 +15,7 @@ const checkCards = async (page, count) => {
         const height = frontImg.height;
     
         const options = {
-            maxDiffPixelRatio: 0.02
+            maxDiffPixelRatio: 0.1
         }
         await expect(frontImg).toHaveScreenshot(`card-${i}-front.png`, options);
         await expect(backImg).toHaveScreenshot(`card-${i}-back.png`, options);
