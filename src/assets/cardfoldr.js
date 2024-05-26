@@ -363,6 +363,10 @@ const updateCardSelection = () => {
     syncQueryParams();
 }
 
+const refreshCardSelection = async () => {
+    refreshRangeSelection(document.getElementById('cardSelection').value, document.getElementById('cards'), '.card');
+}
+
 const rotateImage180 = async (image) => {
     const img = new Image();
     img.src = image;
@@ -905,6 +909,10 @@ for (const element of document.getElementsByClassName("grid-definition")) {
     element.addEventListener('change', async () => { await refreshGrid() });
 }
 
+for (const id of ["pageSelection", "backgroundPageSelection"]) {
+    document.getElementById(id).addEventListener('change', async () => { await refreshPageSelection() });
+}
+
 const onPdfChange = async (event) => {
     pdf = null;
     clearCards();
@@ -961,6 +969,10 @@ document.getElementById('refresh').addEventListener('click', async () => {
     if (document.getElementById("autoExtract").checked) {
         document.getElementById('extractCards').click();
     }
+});
+
+document.getElementById("cardSelection").addEventListener('change', async () => {
+    await refreshCardSelection();
 });
 
 document.getElementById('extractCards').addEventListener('click', async () => {
