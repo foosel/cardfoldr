@@ -9,6 +9,14 @@ let pdfname = null;
 
 const CARD_IMAGE_SCALE = 4;
 
+const STANDARD_SIZES = {
+    "poker": { width: 63.5, height: 88.9 },
+    "bridge": { width: 57.2, height: 88.9 },
+    "mini": { width: 44.5, height: 63.5 },
+    "tarot": { width: 70, height: 120}
+}
+// source: https://en.m.wikipedia.org/wiki/File:Comparison_playing_card_size.svg
+
 const roundValue = (value, digits) => {
     digits = digits || 0;
     const factor = Math.pow(10, digits);
@@ -611,8 +619,11 @@ const humanFileSize = (bytes) => {
 const generatePdf = async () => {
     const promise = new Promise(async (resolve, reject) => {
         const pageSize = document.getElementById('pageSize').value;
-        const cardWidth = parseFloat(document.getElementById('width').value);
-        const cardHeight = parseFloat(document.getElementById('height').value);
+        const artWidth = parseFloat(document.getElementById('width').value);
+        const artHeight = parseFloat(document.getElementById('height').value);
+        const targetWidth = parseFloat(document.getElementById('targetWidth').value);
+        const targetHeight = parseFloat(document.getElementById('targetHeight').value);
+        const targetKeepAspectRatio = document.getElementById('targetKeepAspectRatio').checked;
 
         const cardMargin = parseFloat(document.getElementById('cardMargin').value);
         const cutMargin = parseFloat(document.getElementById('cutMargin').value);
@@ -625,14 +636,31 @@ const generatePdf = async () => {
         const downloadFilename = document.getElementById('downloadFilename').value;
         const allowMultipleRows = document.getElementById('allowMultipleRows').checked;
 
-        const outerBorderWidth = document.getElementById('outerBorderWidth').value;
-        const innerBorderWidth = document.getElementById('innerBorderWidth').value;
+        const roundCorners = parseFloat(document.getElementById('roundCorners').value);
+        const outerBorder = parseFloat(document.getElementById('outerBorderWidth').value);
+        const innerBorder = parseFloat(document.getElementById('innerBorderWidth').value);
         const backgroundColorFront = document.getElementById('backgroundColorFront').value;
         const backgroundColorBack = document.getElementById('backgroundColorBack').value;
-        const roundCorners = document.getElementById('roundCorners').value;
 
         const generateLog = document.getElementById('generate-output');
         generateLog.textContent = "Collecting cards...";
+
+        const cardWidth = targetWidth + 2 * cutMargin;
+        const cardHeight = targetHeight + 2 * cutMargin;
+
+        let innerBorderWidth = innerBorder, innerBorderHeight = innerBorder;
+        if (targetKeepAspectRatio) {
+            const artAspectRatio = artWidth / artHeight;
+            if (artAspectRatio > (targetWidth / targetHeight)) {
+                const correctCardHeight = cardWidth / artAspectRatio;
+                innerBorderHeight = innerBorder + (targetHeight - correctCardHeight) / 2;
+            } else {
+                const correctCardWidth = cardHeight * artAspectRatio;
+                innerBorderWidth = innerBorder + (targetWidth - correctCardWidth) / 2;
+            }
+        }
+
+        console.log({targetWidth, targetHeight, innerBorderWidth, innerBorderHeight})
 
         const cards = [];
         const radius = roundCorners ? (roundCorners * 72 / 25.4 * CARD_IMAGE_SCALE) : 0;
@@ -730,8 +758,9 @@ const generatePdf = async () => {
                     allowMultipleRows,
                     title,
 
-                    outerBorderWidth,
+                    outerBorder,
                     innerBorderWidth,
+                    innerBorderHeight,
                     borderColorFront: backgroundColorFront,
                     borderColorBack: backgroundColorBack
                 }
@@ -924,6 +953,17 @@ const onStepSizeChange = (event) => {
     }
 }
 
+const syncTargetSize = () => {
+    const width = parseFloat(document.getElementById('width').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const cutMargin = parseFloat(document.getElementById('cutMargin').value);
+    const innerBorderWidth = parseFloat(document.getElementById('innerBorderWidth').value);
+
+    document.getElementById("targetWidth").value = width - 2 * cutMargin + 2 * innerBorderWidth;
+    document.getElementById("targetHeight").value = height - 2 * cutMargin + 2 * innerBorderWidth;
+    syncQueryParams();
+};
+
 const generateQuery = () => {
     const query = new URLSearchParams();
     document.querySelectorAll('[data-query]').forEach(element => {
@@ -942,6 +982,10 @@ for (const element of document.getElementsByClassName("grid-definition")) {
 
 for (const id of ["pageSelection", "backgroundPageSelection"]) {
     document.getElementById(id).addEventListener('change', async () => { await refreshPageSelection() });
+}
+
+for (const element of document.getElementsByClassName("target-size")) {
+    element.addEventListener('change', () => { syncTargetSize() });
 }
 
 const onPdfChange = async (event) => {
@@ -1050,6 +1094,23 @@ document.getElementById('extractCards').addEventListener('click', async () => {
     }, 100);
 });
 
+document.getElementById('targetSizePresets').addEventListener('change', (event) => {
+    const preset = event.target.value;
+    if (preset === "") {
+        return;
+    }
+
+    const data = STANDARD_SIZES[preset];
+    if (data) {
+        document.getElementById('targetWidth').value = data.width;
+        document.getElementById('targetHeight').value = data.height;
+    };
+});
+
+document.getElementById('resetTargetSize').addEventListener('click', () => {
+    syncTargetSize();
+});
+
 document.getElementById('generate').addEventListener('click', async () => {
     document.getElementById('generate').getElementsByClassName("fa")[0].classList = "fa fa-spinner fa-spin";
 
@@ -1093,6 +1154,9 @@ window.onload = async () => {
 
     // sync step size
     onStepSizeChange();
+
+    // sync target size
+    syncTargetSize();
 
     // load source PDF
     const fileElement = document.getElementById('file');

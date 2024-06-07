@@ -95,9 +95,9 @@
                     <div class="pure-control-group">
                         <label for="width">Card size:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="width" class="grid-value grid-definition width-medium" step="0.1" value="63" data-query="grid-width" data-preset="grid-width" />
+                            <input type="number" id="width" class="grid-value grid-definition target-size width-medium" step="0.1" value="63" data-query="grid-width" data-preset="grid-width" />
                             <span class="pure-form-addon">x</span>
-                            <input type="number" id="height" class="grid-value grid-definition width-medium" step="0.1" value="88" data-query="grid-height" data-preset="grid-height" />
+                            <input type="number" id="height" class="grid-value grid-definition target-size width-medium" step="0.1" value="88" data-query="grid-height" data-preset="grid-height" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                     </div>
@@ -127,7 +127,7 @@
                     <div class="pure-control-group">
                         <label for="cutMargin">Cut margin:</label>
                         <div class="pure-form-input">
-                            <input type="number" id="cutMargin" class="grid-value grid-definition width-medium" min="0" step="0.1" value="0" data-query="grid-cut-margin" data-preset="grid-cut-margin" />
+                            <input type="number" id="cutMargin" class="grid-value grid-definition target-size width-medium" min="0" step="0.1" value="0" data-query="grid-cut-margin" data-preset="grid-cut-margin" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Distance from the edge of the card to the cut line</span>
@@ -334,7 +334,7 @@
                     <div class="pure-control-group">
                         <label for="innerBorderWidth">Inner border:</label>
                         <div class="pure-form-input width-medium">
-                            <input type="number" id="innerBorderWidth" min="0" step="0.1" value="0" data-query="output-inner-border-width" />
+                            <input type="number" id="innerBorderWidth" class="target-size" min="0" step="0.1" value="0" data-query="output-inner-border-width" />
                             <span class="pure-form-addon">mm</span>
                         </div>
                         <span class="pure-form-message-inline">Add an additional margin around the border of the finished card</span>
@@ -350,6 +350,31 @@
                         <label for="backgroundColorBack">Background color back:</label>
                         <input type="color" id="backgroundColorBack" value="#ffffff" data-query="output-background-color-back" />
                         <span class="pure-form-message-inline">Background color for card backs</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="targetWidth">Target size:</label>
+                        <div class="pure-form-input">
+                            <input type="number" id="targetWidth" class="width-medium" step="0.1" data-query="output-target-width" />
+                            <span class="pure-form-addon">x</span>
+                            <input type="number" id="targetHeight" class="width-medium" step="0.1" data-query="output-target-height" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
+                        <select id="targetSizePresets" class="min-width-medium">
+                            <option>Custom...</option>
+                            <option value="poker">Poker</option>
+                            <option value="bridge">Bridge</option>
+                            <option value="mini">Mini</option>
+                            <option value="tarot">Tarot</option>
+                        </select>
+                        <button id="resetTargetSize" class="pure-button" title="Reset target size"><i class="fa fa-refresh"></i></button>
+
+                        <span class="pure-form-message-inline">Size of the cards in the final PDF</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <span class="spacer"></span>
+                        <input type="checkbox" id="targetKeepAspectRatio" data-query="output-keep-ratio" checked /> <label for="targetKeepAspectRatio">Keep artwork aspect ratio</label>
                     </div>
                 </fieldset>
 
