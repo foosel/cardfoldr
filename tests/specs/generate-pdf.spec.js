@@ -140,3 +140,110 @@ test("PDF generation: no rows", async ({page, testPdf}, testInfo) => {
     // cleanup
     await download.delete();
 });
+
+test("PDF generation: target size mini fit", async ({page, testPdf}, testInfo) => {
+    await page.locator("#targetSizePresets").selectOption("mini");
+    await page.locator("#targetAspectRatio").selectOption("fit");
+    
+    // generate PDF
+    await page.locator("#generate").click();
+
+    // verify the PDF is generated
+    await expect(await page.locator("#download-button").getAttribute("href")).toContain("blob:");
+    await expect(await page.locator("#output iframe").getAttribute("src")).toContain("blob:");
+
+    // download PDF
+    const downloadPromise = page.waitForEvent('download');
+    await expect(await page.locator("#download-button").getAttribute("download")).toBe(testPdf.outputFilename);
+    await page.locator("#download-button").click();
+    const download = await downloadPromise;
+
+    // verify the PDF is downloaded
+    expect(download.url()).toContain("blob:");
+    expect(download.suggestedFilename()).toMatch(/.pdf$/i);
+    await checkPdf(download, testPdf.outputPathMiniFit, testInfo);
+    
+    // cleanup
+    await download.delete();
+});
+
+test("PDF generation: target size mini cover", async ({page, testPdf}, testInfo) => {
+    await page.locator("#targetSizePresets").selectOption("mini");
+    await page.locator("#targetAspectRatio").selectOption("cover");
+    
+    // generate PDF
+    await page.locator("#generate").click();
+
+    // verify the PDF is generated
+    await expect(await page.locator("#download-button").getAttribute("href")).toContain("blob:");
+    await expect(await page.locator("#output iframe").getAttribute("src")).toContain("blob:");
+
+    // download PDF
+    const downloadPromise = page.waitForEvent('download');
+    await expect(await page.locator("#download-button").getAttribute("download")).toBe(testPdf.outputFilename);
+    await page.locator("#download-button").click();
+    const download = await downloadPromise;
+
+    // verify the PDF is downloaded
+    expect(download.url()).toContain("blob:");
+    expect(download.suggestedFilename()).toMatch(/.pdf$/i);
+    await checkPdf(download, testPdf.outputPathMiniCover, testInfo);
+    
+    // cleanup
+    await download.delete();
+});
+
+test("PDF generation: target size mini stretch", async ({page, testPdf}, testInfo) => {
+    await page.locator("#targetSizePresets").selectOption("mini");
+    await page.locator("#targetAspectRatio").selectOption("stretch");
+    
+    // generate PDF
+    await page.locator("#generate").click();
+
+    // verify the PDF is generated
+    await expect(await page.locator("#download-button").getAttribute("href")).toContain("blob:");
+    await expect(await page.locator("#output iframe").getAttribute("src")).toContain("blob:");
+
+    // download PDF
+    const downloadPromise = page.waitForEvent('download');
+    await expect(await page.locator("#download-button").getAttribute("download")).toBe(testPdf.outputFilename);
+    await page.locator("#download-button").click();
+    const download = await downloadPromise;
+
+    // verify the PDF is downloaded
+    expect(download.url()).toContain("blob:");
+    expect(download.suggestedFilename()).toMatch(/.pdf$/i);
+    await checkPdf(download, testPdf.outputPathMiniStretch, testInfo);
+    
+    // cleanup
+    await download.delete();
+});
+
+test("PDF generation: border", async ({page, testPdf}, testInfo) => {
+    await page.locator("#innerBorderWidth").fill("1");
+    await page.locator("#outerBorderWidth").fill("2");
+    await page.locator("#roundCorners").fill("3");
+    await page.locator("#backgroundColorFront").fill("#000000");
+    await page.locator("#backgroundColorBack").fill("#000000");
+    
+    // generate PDF
+    await page.locator("#generate").click();
+
+    // verify the PDF is generated
+    await expect(await page.locator("#download-button").getAttribute("href")).toContain("blob:");
+    await expect(await page.locator("#output iframe").getAttribute("src")).toContain("blob:");
+
+    // download PDF
+    const downloadPromise = page.waitForEvent('download');
+    await expect(await page.locator("#download-button").getAttribute("download")).toBe(testPdf.outputFilename);
+    await page.locator("#download-button").click();
+    const download = await downloadPromise;
+
+    // verify the PDF is downloaded
+    expect(download.url()).toContain("blob:");
+    expect(download.suggestedFilename()).toMatch(/.pdf$/i);
+    await checkPdf(download, testPdf.outputPathBorder, testInfo);
+    
+    // cleanup
+    await download.delete();
+});

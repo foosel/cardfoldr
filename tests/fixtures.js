@@ -9,6 +9,10 @@ const testPdf = {
     outputPathVerticalOnly: "./files/test-pdf.foldable.vertical.pdf",
     outputPathHorizontalOnly: "./files/test-pdf.foldable.horizontal.pdf",
     outputPathNoRows: "./files/test-pdf.foldable.no-rows.pdf",
+    outputPathMiniFit: "./files/test-pdf.foldable.mini-fit.pdf",
+    outputPathMiniCover: "./files/test-pdf.foldable.mini-cover.pdf",
+    outputPathMiniStretch: "./files/test-pdf.foldable.mini-stretch.pdf",
+    outputPathBorder: "./files/test-pdf.foldable.border.pdf",
     outputFilename: "test-pdf.foldable.pdf"
 }
 
