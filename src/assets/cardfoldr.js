@@ -7,6 +7,8 @@ let pdf = null;
 let backgroundPdf = null;
 let pdfname = null;
 
+const CARD_IMAGE_SCALE = 4;
+
 const roundValue = (value, digits) => {
     digits = digits || 0;
     const factor = Math.pow(10, digits);
@@ -367,7 +369,7 @@ const refreshCardSelection = async () => {
     refreshRangeSelection(document.getElementById('cardSelection').value, document.getElementById('cards'), '.card');
 }
 
-const rotateImage180 = async (image) => {
+const prepareCardImage = async (image, rotation, radius, backgroundColor) => {
     const img = new Image();
     img.src = image;
     await img.decode();
@@ -377,9 +379,18 @@ const rotateImage180 = async (image) => {
     canvas.height = img.height;
 
     const ctx = canvas.getContext('2d');
-    ctx.translate(img.width / 2, img.height / 2);
-    ctx.rotate(Math.PI);
-    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.roundRect(0, 0, canvas.width, canvas.height, radius);
+    ctx.clip();
+
+    if (rotation % (2 * Math.PI) != 0) {
+        ctx.translate(img.width / 2, img.height / 2);
+        ctx.rotate(rotation);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);    
+    } else {
+        ctx.drawImage(img, 0, 0);
+    }
 
     const mimeType = image.startsWith("data:image/png") ? "image/png" : "image/jpeg";
     const src = canvas.toDataURL(mimeType);
@@ -404,7 +415,7 @@ const extractCards = async () => {
     const rotateBacks = document.getElementById('rotateBacks').checked;
     const optimizeFor = document.getElementById('optimize').value;
 
-    const scale = 4;
+    const scale = CARD_IMAGE_SCALE;
     const orientationClass = (width > height) ? "landscape" : "portrait";
 
     clearCards();
@@ -602,6 +613,7 @@ const generatePdf = async () => {
         const pageSize = document.getElementById('pageSize').value;
         const cardWidth = parseFloat(document.getElementById('width').value);
         const cardHeight = parseFloat(document.getElementById('height').value);
+
         const cardMargin = parseFloat(document.getElementById('cardMargin').value);
         const cutMargin = parseFloat(document.getElementById('cutMargin').value);
         const foldingMargin = parseFloat(document.getElementById('foldingMargin').value);
@@ -613,16 +625,28 @@ const generatePdf = async () => {
         const downloadFilename = document.getElementById('downloadFilename').value;
         const allowMultipleRows = document.getElementById('allowMultipleRows').checked;
 
+        const outerBorderWidth = document.getElementById('outerBorderWidth').value;
+        const innerBorderWidth = document.getElementById('innerBorderWidth').value;
+        const backgroundColorFront = document.getElementById('backgroundColorFront').value;
+        const backgroundColorBack = document.getElementById('backgroundColorBack').value;
+        const roundCorners = document.getElementById('roundCorners').value;
+
         const generateLog = document.getElementById('generate-output');
         generateLog.textContent = "Collecting cards...";
 
         const cards = [];
+        const radius = roundCorners ? (roundCorners * 72 / 25.4 * CARD_IMAGE_SCALE) : 0;
         for (const cardElement of document.querySelectorAll('.card:not(.excluded)')) {
             const frontImageElement = cardElement.getElementsByClassName('front')[0];
             const backImageElement = cardElement.getElementsByClassName('back')[0];
 
-            const frontImage = foldLineEdge === "top" ? await rotateImage180(frontImageElement.src) : frontImageElement.src;
-            const backImage = foldLineEdge === "top" ? await rotateImage180(backImageElement.src) : backImageElement.src;
+            let frontImage = frontImageElement.src;
+            let backImage = backImageElement.src;
+            const rotation = foldLineEdge === "top" ? Math.PI : 0;
+            if (radius > 0 || rotation > 0) {
+                frontImage = await prepareCardImage(frontImage, rotation, radius, backgroundColorFront);
+                backImage = await prepareCardImage(backImage, rotation, radius, backgroundColorBack);
+            }
 
             cards.push({ front: frontImage, back: backImage });
         }
@@ -705,6 +729,11 @@ const generatePdf = async () => {
                     foldLinePreference,
                     allowMultipleRows,
                     title,
+
+                    outerBorderWidth,
+                    innerBorderWidth,
+                    borderColorFront: backgroundColorFront,
+                    borderColorBack: backgroundColorBack
                 }
             }
         });

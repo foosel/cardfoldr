@@ -311,6 +311,49 @@
                 </fieldset>
 
                 <fieldset>
+                    <legend>Card settings</legend>
+
+                    <div class="pure-control-group">
+                        <label for="roundCorners">Corner radius:</label>
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="roundCorners" min="0" step="0.1" value="0" data-query="output-corner-radius" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
+                        <span class="pure-form-message-inline">Corner radius to apply to the rendered card images</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="outerBorderWidth">Outer border:</label>
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="outerBorderWidth" min="0" step="0.1" value="0" data-query="output-outer-border-width" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
+                        <span class="pure-form-message-inline">Add an additional bleed border around the cuts of the card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="innerBorderWidth">Inner border:</label>
+                        <div class="pure-form-input width-medium">
+                            <input type="number" id="innerBorderWidth" min="0" step="0.1" value="0" data-query="output-inner-border-width" />
+                            <span class="pure-form-addon">mm</span>
+                        </div>
+                        <span class="pure-form-message-inline">Add an additional margin around the border of the finished card</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="backgroundColorFront">Background color front:</label>
+                        <input type="color" id="backgroundColorFront" value="#ffffff" data-query="output-background-color-front" />
+                        <span class="pure-form-message-inline">Background color for card fronts</span>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="backgroundColorBack">Background color back:</label>
+                        <input type="color" id="backgroundColorBack" value="#ffffff" data-query="output-background-color-back" />
+                        <span class="pure-form-message-inline">Background color for card backs</span>
+                    </div>
+                </fieldset>
+
+                <fieldset>
                     <legend>Advanced</legend>
 
                     <div class="pure-control-group">
