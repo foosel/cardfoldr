@@ -13,7 +13,8 @@ const STANDARD_SIZES = {
     "poker": { width: 63.5, height: 88.9 },
     "bridge": { width: 57.2, height: 88.9 },
     "mini": { width: 44.5, height: 63.5 },
-    "tarot": { width: 70, height: 120}
+    "tarot": { width: 70, height: 120},
+    "mint": { width: 60, height: 95 }
 }
 // source: https://en.m.wikipedia.org/wiki/File:Comparison_playing_card_size.svg
 
@@ -377,7 +378,7 @@ const refreshCardSelection = async () => {
     refreshRangeSelection(document.getElementById('cardSelection').value, document.getElementById('cards'), '.card');
 }
 
-const prepareCardImage = async (image, rotation, radius, backgroundColor) => {
+const rotateImage180 = async (image) => {
     const img = new Image();
     img.src = image;
     await img.decode();
@@ -385,6 +386,37 @@ const prepareCardImage = async (image, rotation, radius, backgroundColor) => {
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.translate(img.width / 2, img.height / 2);
+    ctx.rotate(Math.PI);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+    const mimeType = image.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+    const src = canvas.toDataURL(mimeType);
+    return src;
+}
+
+const prepareCardImage = async (image, rotation, radius, backgroundColor, targetAspectRatio) => {
+    const img = new Image();
+    img.src = image;
+    await img.decode();
+
+    const canvas = document.createElement('canvas');
+
+    if (targetAspectRatio > 0) {
+        const aspectRatio = img.width / img.height;
+        if (aspectRatio > targetAspectRatio) {
+            canvas.width = img.height * targetAspectRatio;
+            canvas.height = img.height;
+        } else {
+            canvas.width = img.width;
+            canvas.height = img.width / targetAspectRatio;
+        }
+    } else {
+        canvas.width = img.width;
+        canvas.height = img.height;
+    }
 
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = backgroundColor;
@@ -397,7 +429,7 @@ const prepareCardImage = async (image, rotation, radius, backgroundColor) => {
         ctx.rotate(rotation);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);    
     } else {
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, img.width, img.height, (canvas.width - img.width) / 2, (canvas.height - img.height) / 2, img.width, img.height);
     }
 
     const mimeType = image.startsWith("data:image/png") ? "image/png" : "image/jpeg";
@@ -623,7 +655,7 @@ const generatePdf = async () => {
         const artHeight = parseFloat(document.getElementById('height').value);
         const targetWidth = parseFloat(document.getElementById('targetWidth').value);
         const targetHeight = parseFloat(document.getElementById('targetHeight').value);
-        const targetKeepAspectRatio = document.getElementById('targetKeepAspectRatio').checked;
+        const targetAspectRatioSetting = document.getElementById('targetAspectRatio').value;
 
         const cardMargin = parseFloat(document.getElementById('cardMargin').value);
         const cutMargin = parseFloat(document.getElementById('cutMargin').value);
@@ -647,18 +679,31 @@ const generatePdf = async () => {
 
         const cardWidth = targetWidth + 2 * cutMargin;
         const cardHeight = targetHeight + 2 * cutMargin;
+        const artAspectRatio = artWidth / artHeight;
 
         let innerBorderWidth = innerBorder, innerBorderHeight = innerBorder;
-        if (targetKeepAspectRatio) {
-            const artAspectRatio = artWidth / artHeight;
-            if (artAspectRatio > (targetWidth / targetHeight)) {
-                const correctCardHeight = cardWidth / artAspectRatio;
-                innerBorderHeight = innerBorder + (targetHeight - correctCardHeight) / 2;
-            } else {
-                const correctCardWidth = cardHeight * artAspectRatio;
-                innerBorderWidth = innerBorder + (targetWidth - correctCardWidth) / 2;
+        let targetAspectRatio = 0;
+        switch (targetAspectRatioSetting) {
+            case "fit": {
+                if (artAspectRatio > (targetWidth / targetHeight)) {
+                    const correctCardHeight = cardWidth / artAspectRatio;
+                    innerBorderHeight = innerBorder + (targetHeight - correctCardHeight) / 2;
+                } else {
+                    const correctCardWidth = cardHeight * artAspectRatio;
+                    innerBorderWidth = innerBorder + (targetWidth - correctCardWidth) / 2;
+                }
+                break;
             }
-        }
+            case "cover": {
+                // crop to fit
+                targetAspectRatio = targetWidth / targetHeight;
+                break;
+            }
+            case "stretch": {
+                // do nothing
+                break;
+            }
+        };
 
         console.log({targetWidth, targetHeight, innerBorderWidth, innerBorderHeight})
 
@@ -671,9 +716,9 @@ const generatePdf = async () => {
             let frontImage = frontImageElement.src;
             let backImage = backImageElement.src;
             const rotation = foldLineEdge === "top" ? Math.PI : 0;
-            if (radius > 0 || rotation > 0) {
-                frontImage = await prepareCardImage(frontImage, rotation, radius, backgroundColorFront);
-                backImage = await prepareCardImage(backImage, rotation, radius, backgroundColorBack);
+            if (radius > 0 || rotation > 0 || targetAspectRatio > 0) {
+                frontImage = await prepareCardImage(frontImage, rotation, radius, backgroundColorFront, targetAspectRatio);
+                backImage = await prepareCardImage(backImage, rotation, radius, backgroundColorBack, targetAspectRatio);
             }
 
             cards.push({ front: frontImage, back: backImage });
@@ -953,6 +998,13 @@ const onStepSizeChange = (event) => {
     }
 }
 
+const syncTargetSizeOnlyIfUnset = () => {
+    if (document.getElementById('targetWidth').value !== "" && document.getElementById('targetHeight').value !== "") {
+        return;
+    }
+    syncTargetSize();
+}
+
 const syncTargetSize = () => {
     const width = parseFloat(document.getElementById('width').value);
     const height = parseFloat(document.getElementById('height').value);
@@ -962,6 +1014,8 @@ const syncTargetSize = () => {
     document.getElementById("targetWidth").value = width - 2 * cutMargin + 2 * innerBorderWidth;
     document.getElementById("targetHeight").value = height - 2 * cutMargin + 2 * innerBorderWidth;
     syncQueryParams();
+
+    resetTargetSizePreset();
 };
 
 const generateQuery = () => {
@@ -1105,10 +1159,29 @@ document.getElementById('targetSizePresets').addEventListener('change', (event) 
         document.getElementById('targetWidth').value = data.width;
         document.getElementById('targetHeight').value = data.height;
     };
+    syncQueryParams();
 });
 
 document.getElementById('resetTargetSize').addEventListener('click', () => {
     syncTargetSize();
+});
+
+document.getElementById('swapTargetSize').addEventListener('click', () => {
+    const width = document.getElementById('targetWidth').value;
+    document.getElementById('targetWidth').value = document.getElementById('targetHeight').value;
+    document.getElementById('targetHeight').value = width;
+    syncQueryParams();
+});
+
+const resetTargetSizePreset = () => {
+    document.getElementById('targetSizePresets').querySelector('option:first-child').selected = true;
+}
+
+document.getElementById('targetWidth').addEventListener('change', () => {
+    resetTargetSizePreset();
+});
+document.getElementById('targetHeight').addEventListener('change', () => {
+    resetTargetSizePreset();
 });
 
 document.getElementById('generate').addEventListener('click', async () => {
@@ -1132,6 +1205,19 @@ document.getElementById('generate').addEventListener('click', async () => {
 });
 
 window.onload = async () => {
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    // populate target size presets
+    for (const key in STANDARD_SIZES) {
+        const value = STANDARD_SIZES[key];
+        
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = `${capitalize(key)} (${value.width}x${value.height}mm)`;
+        
+        document.getElementById("targetSizePresets").appendChild(option);
+    }
+
     // pre-fill from query parameters
     for (const [key, value] of (new URL(document.location.toString()).searchParams)) {
         const element = document.querySelector(`[data-query="${key}"]`);
@@ -1155,8 +1241,8 @@ window.onload = async () => {
     // sync step size
     onStepSizeChange();
 
-    // sync target size
-    syncTargetSize();
+    // sync target size if still unset
+    syncTargetSizeOnlyIfUnset();
 
     // load source PDF
     const fileElement = document.getElementById('file');

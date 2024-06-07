@@ -360,21 +360,26 @@
                             <input type="number" id="targetHeight" class="width-medium" step="0.1" data-query="output-target-height" />
                             <span class="pure-form-addon">mm</span>
                         </div>
-                        <select id="targetSizePresets" class="min-width-medium">
-                            <option>Custom...</option>
-                            <option value="poker">Poker</option>
-                            <option value="bridge">Bridge</option>
-                            <option value="mini">Mini</option>
-                            <option value="tarot">Tarot</option>
-                        </select>
+                        <button id="swapTargetSize" class="pure-button" title="Swap x and y"><i class="fa fa-shuffle"></i></button>
                         <button id="resetTargetSize" class="pure-button" title="Reset target size"><i class="fa fa-refresh"></i></button>
 
                         <span class="pure-form-message-inline">Size of the cards in the final PDF</span>
                     </div>
 
                     <div class="pure-control-group">
-                        <span class="spacer"></span>
-                        <input type="checkbox" id="targetKeepAspectRatio" data-query="output-keep-ratio" checked /> <label for="targetKeepAspectRatio">Keep artwork aspect ratio</label>
+                        <label for="targetSizePresets">Size presets:</label>
+                        <select id="targetSizePresets" class="min-width-medium">
+                            <option>Custom...</option>
+                        </select>
+                    </div>
+
+                    <div class="pure-control-group">
+                        <label for="targetAspectRatio">Aspect ratio:</label>
+                        <select id="targetAspectRatio" class="min-width-medium" data-query="output-aspect-ratio">
+                            <option value="fit" selected>Fit</option>
+                            <option value="cover">Cover</option>
+                            <option value="stretch">Stretch</option>
+                        </select>
                     </div>
                 </fieldset>
 

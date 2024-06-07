@@ -303,16 +303,16 @@ if (typeof importScripts === "function") {
                     }
                 } else if (cardWidthDoc < spaceY) {
                     // card fits on half of the page in width, but not height
-                    const [cardsX, cardsY] = maxCoverage(spaceX, spaceY, cardWidthDoc, cardHeightDoc, cardMarginDoc);
-                    cardColumnsPerPage = cardsX;
-                    cardRowsPerPage = allowMultipleRows ? cardsY : 1;
-                    rotate = false; // heads-up, inverted logic!
-                } else if (cardHeightDoc < spaceY) {
-                    // card fits on half of the page in height, but not width
                     const [cardsX, cardsY] = maxCoverage(spaceX, spaceY, cardHeightDoc, cardWidthDoc, cardMarginDoc);
                     cardColumnsPerPage = cardsX;
                     cardRowsPerPage = allowMultipleRows ? cardsY : 1;
-                    rotate = true; // heads-up, inverted logic!
+                    rotate = true;
+                } else if (cardHeightDoc < spaceY) {
+                    // card fits on half of the page in height, but not width
+                    const [cardsX, cardsY] = maxCoverage(spaceX, spaceY, cardWidthDoc, cardHeightDoc, cardMarginDoc);
+                    cardColumnsPerPage = cardsX;
+                    cardRowsPerPage = allowMultipleRows ? cardsY : 1;
+                    rotate = false;
                 } else {
                     continue;
                 }
