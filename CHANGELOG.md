@@ -1,5 +1,16 @@
 # Changelog
 
+## 2024-06-07
+
+### ✨ Improvements
+
+- Added an option to add an inner and outer border to the card fronts and backs generated into the PDF. This allows to add additional bleed and margin to the cards, which can be helpful for cutting them out. Additionally, a radius can be added to the card images as well, which helps in removing crop marks included in the source file. Implements #15.
+- Added an option to set a target size for the cards in the PDF. This will scale the extracted cards to the target size, auto centering as necessary. It's possible to decide whether to scale the cards to fit or fill the target size, or to just stretch the cards to the target size. A number of common target sizes has been included as selectable presets: Poker, Bridge, Mini, Tarot and Mint. Implements #12.
+
+### 🐛 Bug fixes
+
+- Fixed some logic errors in corner cases of the PDF generation.
+
 ## 2024-05-26
 
 ### ✨ Improvements
