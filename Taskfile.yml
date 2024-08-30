@@ -20,8 +20,17 @@ tasks:
     dir: tests
     cmds:
       - npm run test-report
-    
+
   update-screenshots:
     dir: tests
+    ignore_error: true
     cmds:
       - npm run update-screenshots
+      - cp test-results/generate-pdf-PDF-generation-border-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.border.pdf
+      - cp test-results/generate-pdf-PDF-generation-defaults-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.pdf
+      - cp test-results/generate-pdf-PDF-generation-horizontal-enforced-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.horizontal.pdf
+      - cp test-results/generate-pdf-PDF-generation-no-rows-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.no-rows.pdf
+      - cp test-results/generate-pdf-PDF-generation-target-size-mini-cover-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.mini-cover.pdf
+      - cp test-results/generate-pdf-PDF-generation-target-size-mini-fit-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.mini-fit.pdf
+      - cp test-results/generate-pdf-PDF-generation-target-size-mini-stretch-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.mini-stretch.pdf
+      - cp test-results/generate-pdf-PDF-generation-vertical-enforced-chromium/test-pdf.foldable.pdf files/test-pdf.foldable.vertical.pdf
