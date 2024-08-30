@@ -1,10 +1,28 @@
 const { test, expect } = require('../fixtures');
 const ComparePdf = require("compare-pdf");
 
-test.describe.configure({ mode: 'serial' });
+//test.describe.configure({ mode: 'serial' });
+
+const comparePdfConfig = {
+    paths: {
+        actualPdfRootFolder: process.cwd() + "/data/newActualPdfs",
+        baselinePdfRootFolder: process.cwd() + "/data/baselinePdfs",
+        actualPngRootFolder: process.cwd() + "/data/actualPngs",
+        baselinePngRootFolder: process.cwd() + "/data/baselinePngs",
+        diffPngRootFolder: process.cwd() + "/data/diffPngs"
+    },
+    settings: {
+        density: 100,
+        quality: 70,
+        tolerance: 100,
+        threshold: 0.05,
+        cleanPngPaths: false,
+        matchPageCount: true
+    }
+}
 
 const pdfCompare = async (actual, expected) => {
-    return await new ComparePdf()   
+    return await new ComparePdf(comparePdfConfig)   
         .actualPdfFile(actual)
         .baselinePdfFile(expected)
         .compare();
@@ -17,7 +35,7 @@ const checkPdf = async (download, expected, testInfo) => {
         try {
             result = await pdfCompare(await download.path(), expected);
         } catch (error) {
-            result.message = error;
+            result = { message: error };
         }
 
         const actualPath = testInfo.outputPath("test-pdf.foldable.pdf");
