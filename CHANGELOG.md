@@ -1,5 +1,11 @@
 # Changelog
 
+## 2024-08-30
+
+###  🐛 Bug fixes
+
+- Fixed an issue where depending on the source PDF, sometimes the cards would not have all the art they should have and instead showed black boxes or other artifacts. This was likely due to the used PDF render library not rendering all the content when only a part of the page was requested to render. Now, the whole page is rendered out once and then only parts of the rendered image are used for the cards. This seems to have fixed the issue.
+
 ## 2024-06-07
 
 ### ✨ Improvements

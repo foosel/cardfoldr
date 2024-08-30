@@ -477,7 +477,8 @@ const extractCards = async () => {
     for (let p = 0; p < (backLoc === "lastpage" ? pageSelection.length - 1 : pageSelection.length); p = p + ((backLoc === "duplex" || backLoc === "duplex2") ? 2 : 1)) {
         const page = await pdf.getPage(pageSelection[p]);
         const mmFactor = page.userUnit / 72 * 25.4 / scale;
-        const viewport = page.getViewport({ scale: scale });
+
+        const pageCanvas = await drawPage(page, scale);
 
         for (let y = 0; y < countY; y++) {
             for (let x = 0; x < countX; x++) {
@@ -487,7 +488,7 @@ const extractCards = async () => {
 
                 const ctx = canvas.getContext('2d');
                 ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
-                await page.render({ canvasContext: ctx, viewport }).promise;
+                ctx.drawImage(pageCanvas, 0, 0);
 
                 const cardImage = document.createElement('img');
                 cardImage.src = canvas.toDataURL(mimeType);
@@ -532,7 +533,8 @@ const extractCards = async () => {
             backsPage = await backgroundPdf.getPage(backgroundPageSelection[0]);
         }
         const mmFactor = backsPage.userUnit / 72 * 25.4 / scale;
-        const viewport = backsPage.getViewport({ scale: scale });
+
+        const pageCanvas = await drawPage(backsPage, scale);
 
         const canvas = document.createElement('canvas');
         canvas.height = height / mmFactor;
@@ -540,8 +542,7 @@ const extractCards = async () => {
 
         const ctx = canvas.getContext('2d');
         ctx.translate(-1 * startX / mmFactor, -1 * startY / mmFactor);
-
-        await backsPage.render({ canvasContext: ctx, viewport }).promise;
+        ctx.drawImage(pageCanvas, 0, 0);
 
         const src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
 
@@ -556,7 +557,8 @@ const extractCards = async () => {
             for (let y = 0; y < countY; y++) {
                 for (let x = 0; x < countX; x++) {
                     const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
-                    const viewport = backPage.getViewport({ scale: scale });
+
+                    const pageCanvas = await drawPage(backPage, scale);
 
                     const canvas = document.createElement('canvas');
                     canvas.height = height / mmFactor;
@@ -564,8 +566,7 @@ const extractCards = async () => {
 
                     const ctx = canvas.getContext('2d');
                     ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
-            
-                    await backPage.render({ canvasContext: ctx, viewport }).promise;
+                    ctx.drawImage(pageCanvas, 0, 0);
 
                     const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
                     cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
@@ -580,7 +581,8 @@ const extractCards = async () => {
         for (let p = 1; p < pageSelection.length; p = p + 2) {
             const backPage = await pdf.getPage(pageSelection[p]);
             const mmFactor = backPage.userUnit / 72 * 25.4 / scale;
-            const viewport = backPage.getViewport({ scale: scale });
+
+            const pageCanvas = await drawPage(backPage, scale);
 
             if (backLoc === "duplex") {
                 for (let y = 0; y < countY; y++) {
@@ -591,9 +593,8 @@ const extractCards = async () => {
 
                         const ctx = canvas.getContext('2d');
                         ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
+                        ctx.drawImage(pageCanvas, 0, 0);
                 
-                        await backPage.render({ canvasContext: ctx, viewport }).promise;
-
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
                         cardImage.src = rotateBacks ? await rotateImage180(canvas.toDataURL(mimeType)) : canvas.toDataURL(mimeType);
                         
@@ -609,8 +610,7 @@ const extractCards = async () => {
 
                         const ctx = canvas.getContext('2d');
                         ctx.translate(-1 * (startX + x * width + x * marginX) / mmFactor, -1 * (startY + y * height + y * marginY) / mmFactor);
-
-                        await backPage.render({ canvasContext: ctx, viewport }).promise;
+                        ctx.drawImage(pageCanvas, 0, 0);
 
                         const cardImage = document.getElementById(`card-${backCount}`).getElementsByClassName('back')[0];
                         cardImage.src = rotateBacks ? canvas.toDataURL(mimeType) : await rotateImage180(canvas.toDataURL(mimeType));
