@@ -7,7 +7,7 @@
     "start": "npx http-server ../src -p 8000",
     "test": "npx playwright test",
     "test-ui": "npx playwright test --ui",
-    "update-screenshots": "npx playwright test --update-snapshots",
+    "update-screenshots": "npx playwright test --update-snapshots --reporter=line",
     "test-report": "npx playwright show-report"
   },
   "keywords": [],
