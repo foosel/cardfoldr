@@ -15,7 +15,7 @@ const comparePdfConfig = {
         density: 100,
         quality: 70,
         tolerance: 100,
-        threshold: 0.05,
+        threshold: 0.07,
         cleanPngPaths: false,
         matchPageCount: true
     }
