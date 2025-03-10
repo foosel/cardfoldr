@@ -26,3 +26,13 @@ CardFoldr uses the following fine projects:
 - [pure.css](https://purecss.io/)
 - [Font Awesome](https://fontawesome.com/)
 - [Playwright](https://playwright.dev/)
+
+## Development
+
+A [Taskfile](https://taskfile.dev/) is provided that features the following commands:
+
+- `serve`: Serves the app on `localhost:8000`
+- `test`: Runs the test suite
+- `test-ui`: Runs the test suite with Playwright's UI
+- `test-report`: Opens the report of the latest test run
+- `update-screenshots`: Updates the screenshots used for expected PDF output results
