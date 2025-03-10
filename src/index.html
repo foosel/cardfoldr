@@ -19,7 +19,11 @@
     <body>
         <main class="container">
 
-            <h1>🃏 CardFoldr</h1>
+            <h1>
+                🃏 CardFoldr 
+                <a href="https://boardgamegeek.com/thread/3298313/i-created-a-tool-to-create-foldable-card-pdfs-from" target="_blank"><img src="assets/img/bgg_thread.svg"></a>
+                <a href="https://boardgamegeek.com/geeklist/336986/cardfoldr-settings-for-games" target="_blank"><img src="assets/img/bgg_geeklist.svg"></a>
+            </h1>
 
             <p>
                 CardFoldr is a tool to help you convert a PDF of card grids (say, 3x3 cards per page, several 
@@ -31,7 +35,10 @@
             </p>
             <p>
                 CardFoldr runs completely in your browser, nothing is uploaded to a server. You can also download
-                and host it yourself if you prefer. The source code is available on <a href="https://github.com/foosel/cardfoldr">GitHub</a>.
+                and host it yourself if you prefer. The source code is available on <a href="https://github.com/foosel/cardfoldr" target="_blank">GitHub</a>.
+            </p>
+            <p>
+                A Geeklist with community based settings for various games can be found here: <a href="https://boardgamegeek.com/geeklist/336986/cardfoldr-settings-collection" target="_blank">CardFoldr settings collection</a>. Feel free to add to it!
             </p>
 
             <!-- PDF selection -->
@@ -224,7 +231,7 @@
                 </div>
 
                 <div class="pure-controls">
-                    <button id="extractCards" class="pure-button pure-button-primary"><i class="fa fa-gear"></i> Extract Cards</button> <input type="checkbox" id="autoExtract" /> <label for="autoExtract">Auto extract</label>
+                    <button id="extractCards" class="pure-button pure-button-primary"><i class="fa fa-gear"></i> Extract Cards</button> <input type="checkbox" id="autoExtract" /> <label for="autoExtract" title="Enable to automatically run the extraction on any grid change">Auto extract</label>
                 </div>
             </form>
 
@@ -401,7 +408,7 @@
                 <div class="pure-controls">
                     <button id="generate" class="pure-button pure-button-primary" disabled>
                         <i class="fa fa-flag-checkered"></i> Generate PDF
-                    </button> <input type="checkbox" id="autoGenerate" /> <label for="autoGenerate">Auto generate</label>
+                    </button> <input type="checkbox" id="autoGenerate" /> <label for="autoGenerate" title="Enable to automatically generate the PDF on any changes above">Auto generate</label>
                 </div>
 
                 <div class="pure-controls">
@@ -420,7 +427,7 @@
         </main>
 
         <footer>
-            <span id="author">Created with ❤️ by <a href="https://foosel.net">Gina "foosel" Häußge</a></span>
+            <span id="author">Created with ❤️ by <a href="https://foosel.net" target="_blank">Gina "foosel" Häußge</a></span>
             <span><a href="https://github.com/foosel/cardfoldr/issues/new/choose" target="_blank" rel="noopener noreferer">Problems? Suggestions?</a></span>
         </footer>
     </body>
