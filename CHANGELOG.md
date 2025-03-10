@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-03-10
+
+### ✨ Improvements
+
+- Added a link to the BGG geeklist with settings and the discussion thread of the tool on the BGG forums.
+
 ## 2024-08-30
 
 ###  🐛 Bug fixes
